@@ -419,8 +419,8 @@ echo -e "\\e[1;33mSilakan kunjungi: https://${installerDomain} untuk login awal 
       return `<?php
 /**
  * =========================================================================
- * STARBILLING WEB INSTALLER (starbilling/install/index.php)
- * Platform     : Localhost (XAMPP / Laragon / LAMP)
+ * STARBILLING WEB INSTALLER (install/index.php)
+ * Platform     : Web Server (XAMPP / Cpanel / VPS)
  * Description  : Interactive installation wizard with Clean DB enforcement
  * =========================================================================
  */
@@ -450,7 +450,7 @@ echo "<div class='w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2
 // Header
 echo "<div class='text-center space-y-2 border-b border-slate-800 pb-4'>
     <h1 class='text-lg font-bold text-white tracking-wider font-mono uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-500'>⚡ STARBILLING WEB INSTALLER</h1>
-    <p class='text-xs text-slate-400'>Instalasi langsung ke direktori <span class='font-mono text-cyan-400 bg-slate-950 px-1.5 py-0.5 rounded'>starbilling/install</span></p>
+    <p class='text-xs text-slate-400'>Instalasi langsung ke direktori <span class='font-mono text-cyan-400 bg-slate-950 px-1.5 py-0.5 rounded'>install</span></p>
 </div>";
 
 if ($step === 1) {
@@ -553,10 +553,10 @@ if ($step === 1) {
             <div class='text-emerald-400 font-bold text-sm'>✔ INSTALASI BERHASIL!</div>
             <p class='text-[11px] text-slate-300'>Database bersih siap digunakan untuk operasional riil ISP Anda. Tidak ada data dummy yang tertinggal.</p>
         </div>";
-        echo "<a href='http://localhost/starbilling/' class='block text-center bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-3 rounded-xl text-xs uppercase tracking-wider font-mono transition shadow-lg'>
+        echo "<a href='../' class='block text-center bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-3 rounded-xl text-xs uppercase tracking-wider font-mono transition shadow-lg'>
             Masuk Ke Aplikasi Admin (Super Admin)
         </a>";
-        echo "<p class='text-[10px] text-center text-slate-500'>⚠️ Demi keamanan, silakan hapus folder <span class='font-mono'>starbilling/install</span> sebelum go-live.</p>";
+        echo "<p class='text-[10px] text-center text-slate-500'>⚠️ Demi keamanan, silakan hapus folder <span class='font-mono'>install</span> sebelum go-live.</p>";
     } else {
         echo "<a href='?step=1' class='block text-center bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-xs uppercase tracking-wider font-mono transition'>
             Kembali ke Pengaturan database
@@ -2026,7 +2026,7 @@ if ($action === 'verify') {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {[
                     { id: 'cyberpanel', name: 'CyberPanel (VPS / OLS)', desc: 'Auto-deploy untuk OpenLiteSpeed & PHP 8.2.', icon: Server, color: 'text-cyan-400 border-cyan-500/20' },
-                    { id: 'localhost_php', name: 'Localhost Web Wizard', desc: 'Instalasi langsung via folder starbilling/install.', icon: Cpu, color: 'text-indigo-400 border-indigo-500/20' },
+                    { id: 'localhost_php', name: 'Web Wizard (XAMPP/Cpanel)', desc: 'Instalasi langsung via folder /install.', icon: Cpu, color: 'text-indigo-400 border-indigo-500/20' },
                     { id: 'cpanel', name: 'cPanel (Shared Hosting)', desc: 'Instalasi berbasis web via berkas setup.php.', icon: Globe, color: 'text-emerald-400 border-emerald-500/20' }
                   ].map((p) => {
                     const Icon = p.icon;
@@ -2261,10 +2261,10 @@ if ($action === 'verify') {
                     </ol>
                   ) : installerPlatform === 'localhost_php' ? (
                     <ol className="list-decimal list-inside text-xs text-slate-400 space-y-1.5 leading-relaxed">
-                      <li>Pastikan Anda telah memasang <strong>XAMPP / Laragon / LAMP</strong> dengan minimal PHP 8.2 dan MySQL aktif di komputer lokal Anda.</li>
-                      <li>Buat direktori baru bernama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">starbilling/install</code> di folder htdocs/www Anda.</li>
-                      <li>Unduh script kustom <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">index.php</code> dari tombol "Unduh File" di atas, lalu letakkan di dalam folder <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">starbilling/install</code> tersebut.</li>
-                      <li>Buka browser Anda dan akses alamat instalasi langsung: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">http://localhost/starbilling/install</code>.</li>
+                      <li>Pastikan Anda telah memasang <strong>XAMPP / Laragon / LAMP</strong> atau web server aktif (Cpanel/VPS) dengan PHP 8.2 dan MySQL.</li>
+                      <li>Buat direktori baru bernama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install</code> di folder utama website Anda (root direktori / public_html / htdocs).</li>
+                      <li>Unduh script kustom <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">index.php</code> dari tombol "Unduh File" di atas, lalu letakkan di dalam folder <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install</code> tersebut.</li>
+                      <li>Buka browser Anda dan akses alamat instalasi: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">http://starbilling.net/install</code> atau <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">http://localhost/install</code>.</li>
                       <li>Program Web Installer interaktif akan memandu Anda untuk memvalidasi syarat server, membuat database, membersihkan data dummy, dan mendaftarkan Super Admin.</li>
                       <li>Setelah selesai, demi keamanan, hapus folder <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install</code> agar tidak bisa diakses kembali.</li>
                     </ol>
