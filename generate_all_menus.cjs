@@ -1,76 +1,32 @@
-import { useState } from 'react';
-import {
-  LayoutDashboard, Server, Users, Users2, MapPin, Router, Package, UserCheck, UserPlus,
-  WalletCards, Ticket, MessageSquare, ArrowRightLeft, CreditCard, Receipt, HandCoins,
-  FileText, Settings, Shield, Building2, TerminalSquare, Puzzle, UsersRound, Settings2,
-  LogOut, ChevronDown, ChevronRight, Menu, X, Download, Github, RefreshCw,
-  CheckCircle2, AlertCircle
-} from 'lucide-react';
+const fs = require('fs');
+let content = fs.readFileSync('src/App.tsx', 'utf8');
 
-export default function App() {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [activeMenu, setActiveMenu] = useState('dashboard');
-  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
-    'members': true,
-    'transactions': false,
-    'settings': false
-  });
+const startIndex = content.indexOf('const renderContent = () => {');
+const endIndex = content.indexOf('  return (', startIndex);
 
-  const toggleSubmenu = (menu: string) => {
-    setExpandedMenus(prev => ({
-      ...prev,
-      [menu]: !prev[menu]
-    }));
-  };
+if (startIndex === -1 || endIndex === -1) {
+    console.log("Could not find boundaries");
+    process.exit(1);
+}
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'server', label: 'Setting Server', icon: Server },
-    {
-      id: 'members',
-      label: 'Members & Billing',
-      icon: Users,
-      subItems: [
-        { id: 'kelola-pelanggan', label: 'Kelola Data Pelanggan', icon: Users2 },
-        { id: 'wilayah', label: 'Setting Wilayah', icon: MapPin },
-        { id: 'odp', label: 'Setting ODP', icon: Router },
-        { id: 'paket', label: 'Setting Paket', icon: Package },
-        { id: 'data-pelanggan', label: 'Data Pelanggan', icon: UserCheck },
-        { id: 'pendaftaran', label: 'Pendaftaran Online', icon: UserPlus },
-        { id: 'kolektor', label: 'Kolektor', icon: WalletCards },
-        { id: 'komplain', label: 'Ticket Komplain', icon: Ticket },
-        { id: 'pesan', label: 'Pesan Otomatis', icon: MessageSquare },
-        { id: 'transaksi', label: 'Transaksi', icon: ArrowRightLeft },
-      ]
-    },
-    {
-      id: 'transactions',
-      label: 'Pembayaran & Transaksi Lainya',
-      icon: CreditCard,
-      subItems: [
-        { id: 'transaksi-lain', label: 'Transaksi Lain-Lain', icon: ArrowRightLeft },
-        { id: 'pembayaran', label: 'Pembayaran Tagihan', icon: Receipt },
-        { id: 'biaya-diskon', label: 'Biaya & Diskon', icon: HandCoins },
-      ]
-    },
-    { id: 'laporan', label: 'Laporan', icon: FileText },
-    {
-      id: 'settings',
-      label: 'Setting',
-      icon: Settings,
-      subItems: [
-        { id: 'identitas', label: 'Identitas & Lisensi', icon: Shield },
-        { id: 'bank', label: 'Master Bank', icon: Building2 },
-        { id: 'payment', label: 'Payment Gateway', icon: TerminalSquare },
-        { id: 'addon', label: 'AddOn', icon: Puzzle },
-        { id: 'karyawan', label: 'Karyawan', icon: UsersRound },
-        { id: 'sistem', label: 'Sistem Setting', icon: Settings2 },
-        { id: 'github-sync', label: 'Update & GitHub Sync', icon: Github },
-      ]
+// Read the github-sync part to keep it intact
+const githubStart = content.indexOf(') : activeMenu === \'github-sync\' ? (');
+let githubSyncBlock = '';
+if (githubStart !== -1) {
+    let bracketCount = 0;
+    let foundFirst = false;
+    let i = githubStart;
+    let githubEndIndex = -1;
+    
+    // We can just extract everything between 'github-sync\' ? (' and ') : ('
+    const nextColonIndex = content.indexOf(') : (', githubStart + 20);
+    if (nextColonIndex !== -1) {
+        githubSyncBlock = content.substring(githubStart + 36, nextColonIndex);
     }
-  ];
+}
 
-  const renderContent = () => {
+// Generate the new renderContent
+const newRenderContent = `const renderContent = () => {
     switch (activeMenu) {
       case 'dashboard':
         return (
@@ -539,143 +495,8 @@ export default function App() {
         );
     }
   };
+`;
 
-  return (
-    <div className="min-h-screen bg-slate-900 flex">
-      {/* Sidebar */}
-      <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50
-        w-72 bg-slate-950 border-r border-slate-800
-        transition-transform duration-300 ease-in-out
-        \${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-20'}
-        flex flex-col
-      `}>
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800">
-          <div className={`flex items-center gap-3 font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 \${!isSidebarOpen && 'lg:hidden'}`}>
-            <Server className="text-blue-500" />
-            starbilling.net
-          </div>
-          <button 
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-slate-400 hover:text-white"
-          >
-            <X size={24} />
-          </button>
-        </div>
+content = content.substring(0, startIndex) + newRenderContent + content.substring(endIndex);
 
-        <div className="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
-          <div className="text-xs font-semibold text-slate-500 mb-4 px-3 uppercase tracking-wider">
-            {(!isSidebarOpen) ? 'Menu' : 'Billing System'}
-          </div>
-          
-          <nav className="space-y-1">
-            {navItems.map((item) => (
-              <div key={item.id}>
-                <button
-                  onClick={() => {
-                    if (item.subItems) {
-                      toggleSubmenu(item.id);
-                    } else {
-                      setActiveMenu(item.id);
-                    }
-                  }}
-                  className={`
-                    w-full flex items-center justify-between px-3 py-2.5 rounded-lg
-                    transition-colors duration-200
-                    \${activeMenu === item.id ? 'bg-blue-600/10 text-blue-400' : 'text-slate-300 hover:bg-slate-800/50'}
-                  `}
-                >
-                  <div className="flex items-center gap-3">
-                    <item.icon size={20} className={activeMenu === item.id ? 'text-blue-400' : 'text-slate-400'} />
-                    <span className={`\${!isSidebarOpen && 'lg:hidden'}`}>{item.label}</span>
-                  </div>
-                  {item.subItems && (
-                    <div className={`\${!isSidebarOpen && 'lg:hidden'}`}>
-                      {expandedMenus[item.id] ? (
-                        <ChevronDown size={16} className="text-slate-500" />
-                      ) : (
-                        <ChevronRight size={16} className="text-slate-500" />
-                      )}
-                    </div>
-                  )}
-                </button>
-
-                {/* Submenu */}
-                {item.subItems && expandedMenus[item.id] && (
-                  <div className={`mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1 \${!isSidebarOpen && 'lg:hidden'}`}>
-                    {item.subItems.map((subItem) => (
-                      <button
-                        key={subItem.id}
-                        onClick={() => setActiveMenu(subItem.id)}
-                        className={`
-                          w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm
-                          transition-colors duration-200
-                          \${activeMenu === subItem.id ? 'bg-blue-600/10 text-blue-400' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}
-                        `}
-                      >
-                        <subItem.icon size={16} />
-                        {subItem.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
-        </div>
-
-        <div className="p-4 border-t border-slate-800">
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors">
-            <LogOut size={20} />
-            <span className={`\${!isSidebarOpen && 'lg:hidden'}`}>Logout</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 flex items-center justify-between px-6 bg-slate-950/50 backdrop-blur border-b border-slate-800 z-40">
-          <button 
-            onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className="text-slate-400 hover:text-white transition-colors"
-          >
-            <Menu size={24} />
-          </button>
-          
-          <div className="flex items-center gap-4">
-            <button 
-              className="hidden sm:flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              onClick={() => alert('Gunakan menu titik tiga (Options) -> "Export to ZIP" di atas layar AI Studio untuk mendownload source code PHP.')}
-            >
-              <Download size={16} />
-              Download PHP Source
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <div className="text-sm font-medium text-slate-200">Super Admin</div>
-                <div className="text-xs text-slate-500">admin@starbilling.net</div>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold">
-                SA
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {renderContent()}
-        </div>
-      </main>
-
-      {/* Mobile overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-    </div>
-  );
-}
+fs.writeFileSync('src/App.tsx', content);
