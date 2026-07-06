@@ -2228,32 +2228,35 @@ if ($action === 'verify') {
                               const zip = new JSZip();
                               const codeText = getInstallerCodeText();
                               
-                              zip.folder('.github');
-                              zip.folder('admin');
-                              zip.folder('docs');
-                              const installFolder = zip.folder('install');
-                              if (installFolder) installFolder.file('index.php', codeText);
-                              zip.folder('pages_template');
-                              zip.folder('qrcode');
-                              zip.folder('scan');
-                              zip.folder('system');
-                              zip.folder('ui');
-                              
-                              zip.file('.gitignore', '/node_modules\n/vendor\n.env\n');
-                              zip.file('.htaccess_firewall', 'Order Deny,Allow\nDeny from all\n');
-                              zip.file('CHANGELOG.md', '# Changelog\n\n## 1.0.0\n- Initial Release');
-                              zip.file('Dockerfile', 'FROM php:8.2-apache\nCOPY . /var/www/html/\n');
-                              zip.file('LICENSE', 'Commercial License');
-                              zip.file('README.md', '# StarBilling ISP Suite\nProfessional ISP Billing System.');
-                              zip.file('composer.json', '{\n  "name": "starbilling/core",\n  "description": "StarBilling Core",\n  "require": {\n    "php": "^8.2"\n  }\n}');
-                              zip.file('config.sample.php', '<?php\n// Configuration\n$db_host = "localhost";\n$db_name = "";\n$db_user = "";\n$db_pass = "";\n');
-                              zip.file('docker-compose.example.yml', 'version: "3.8"\nservices:\n  app:\n    build: .\n    ports:\n      - "80:80"');
-                              zip.file('favicon.ico', ''); 
-                              zip.file('index.php', '<?php\n// Redirect to install if not installed\nif (!file_exists("config.php")) {\n    header("Location: install/");\n    exit;\n}\necho "StarBilling is installed.";\n');
-                              zip.file('init.php', '<?php\n// Initialize core systems\n');
-                              zip.file('radius.php', '<?php\n// Radius integration\n');
-                              zip.file('update.php', '<?php\n// Auto updater\n');
-                              zip.file('version.json', '{\n  "version": "1.0.0",\n  "build": "20260706"\n}');
+                              const rootFolder = zip.folder('starbilling');
+                              if (rootFolder) {
+                                rootFolder.folder('.github');
+                                rootFolder.folder('admin');
+                                rootFolder.folder('docs');
+                                const installFolder = rootFolder.folder('install');
+                                if (installFolder) installFolder.file('index.php', codeText);
+                                rootFolder.folder('pages_template');
+                                rootFolder.folder('qrcode');
+                                rootFolder.folder('scan');
+                                rootFolder.folder('system');
+                                rootFolder.folder('ui');
+                                
+                                rootFolder.file('.gitignore', '/node_modules\n/vendor\n.env\n');
+                                rootFolder.file('.htaccess_firewall', 'Order Deny,Allow\nDeny from all\n');
+                                rootFolder.file('CHANGELOG.md', '# Changelog\n\n## 1.0.0\n- Initial Release');
+                                rootFolder.file('Dockerfile', 'FROM php:8.2-apache\nCOPY . /var/www/html/\n');
+                                rootFolder.file('LICENSE', 'Commercial License');
+                                rootFolder.file('README.md', '# StarBilling ISP Suite\nProfessional ISP Billing System.');
+                                rootFolder.file('composer.json', '{\n  "name": "starbilling/core",\n  "description": "StarBilling Core",\n  "require": {\n    "php": "^8.2"\n  }\n}');
+                                rootFolder.file('config.sample.php', '<?php\n// Configuration\n$db_host = "localhost";\n$db_name = "";\n$db_user = "";\n$db_pass = "";\n');
+                                rootFolder.file('docker-compose.example.yml', 'version: "3.8"\nservices:\n  app:\n    build: .\n    ports:\n      - "80:80"');
+                                rootFolder.file('favicon.ico', ''); 
+                                rootFolder.file('index.php', '<?php\n// Redirect to install if not installed\nif (!file_exists("config.php")) {\n    header("Location: install/");\n    exit;\n}\necho "StarBilling is installed.";\n');
+                                rootFolder.file('init.php', '<?php\n// Initialize core systems\n');
+                                rootFolder.file('radius.php', '<?php\n// Radius integration\n');
+                                rootFolder.file('update.php', '<?php\n// Auto updater\n');
+                                rootFolder.file('version.json', '{\n  "version": "1.0.0",\n  "build": "20260706"\n}');
+                              }
                               
                               const content = await zip.generateAsync({ type: 'blob' });
                               const url = URL.createObjectURL(content);
@@ -2310,8 +2313,8 @@ if ($action === 'verify') {
                     <ol className="list-decimal list-inside text-xs text-slate-400 space-y-1.5 leading-relaxed">
                       <li>Pastikan Anda telah memasang <strong>XAMPP / Laragon / LAMP</strong> atau web server aktif (Cpanel/VPS) dengan PHP 8.2 dan MySQL.</li>
                       <li>Unduh file <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">StarBilling_v1.0.0.zip</code> dari tombol "Unduh File" di atas.</li>
-                      <li>Ekstrak (unzip) seluruh isi file tersebut ke folder utama website Anda (seperti <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">htdocs</code> atau <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">public_html</code>).</li>
-                      <li>Buka browser Anda dan akses alamat instalasi: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">http://starbilling.net/install</code> atau <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">http://localhost/install</code> (sesuaikan dengan domain Anda).</li>
+                      <li>Ekstrak (unzip) seluruh isi file tersebut ke folder utama website Anda (seperti <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">htdocs</code> atau <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">public_html</code>). Folder <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">starbilling</code> akan otomatis terbuat.</li>
+                      <li>Buka browser Anda dan akses alamat instalasi: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">http://localhost/starbilling/install</code> (atau sesuaikan dengan domain Anda seperti <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">http://starbilling.net/install</code> jika Anda menempatkannya di root domain).</li>
                       <li>Program Web Installer interaktif akan memandu Anda untuk memvalidasi syarat server, membuat database, membersihkan data dummy, dan mendaftarkan Super Admin.</li>
                       <li>Setelah selesai, demi keamanan, hapus folder <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install</code> agar tidak bisa diakses kembali.</li>
                     </ol>
