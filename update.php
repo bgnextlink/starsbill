@@ -1,0 +1,2 @@
+<?php
+// Auto Updater script
