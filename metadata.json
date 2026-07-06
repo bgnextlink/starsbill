@@ -1,6 +1,0 @@
-{
-  "name": "StarBilling ISP",
-  "description": "Sistem Billing ISP Enterprise modern untuk manajemen pelanggan FTTH, Wireless, Hotspot, dan Dedicated, dengan integrasi MikroTik, billing otomatis, dan GIS Fiber management.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

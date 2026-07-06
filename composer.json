@@ -1,8 +1,6 @@
 {
-    "name": "starbilling/core",
-    "description": "StarBilling Professional ISP Suite",
-    "type": "project",
-    "require": {
-        "php": "^8.2"
-    }
+  "name": "starbilling/core",
+  "require": {
+    "php": "^8.2"
+  }
 }

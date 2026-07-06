@@ -1,2 +1,2 @@
 <?php
-// Radius Server Integration
+// Radius server integration

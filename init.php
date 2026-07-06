@@ -1,2 +1,3 @@
 <?php
-// Core System Initialization
+// Core initialization
+session_start();

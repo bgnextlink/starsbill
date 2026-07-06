@@ -1,2 +1,2 @@
 <?php
-// Auto Updater script
+// Auto-update script
