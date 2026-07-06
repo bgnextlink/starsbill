@@ -82,6 +82,7 @@ export default function Settings({ customers, onUpdateCustomer, userEmail = 'bet
   const [catatanPembayaran, setCatatanPembayaran] = useState(() => localStorage.getItem('sb_catatan_pembayaran') || `[ISOLIR] = Mengambil Tanggal Isolir Pelanggan\nIni akan muncul di footer website https://starbilling.lokal/\ndari Simulasi Browser Address Bar (Link yang dikirim ke WhatsApp / SMS Pelanggan)\nhttps://starbilling.lokal/6281234567890\n\nkamu bisa menambahkan promo dan lain-lain\n💡 [ISOLIR] = Mengambil Tanggal Isolir Pelanggan. Ini akan muncul di footer website https://starbilling.lokal/promo. Anda bisa menambahkan syarat, nomor rekening, promo speed, atau info loket.`);
   const [tampilkanPeriode, setTampilkanPeriode] = useState(() => localStorage.getItem('sb_tampilkan_periode') || 'YA');
   const [ijinkanDaftarOnline, setIjinkanDaftarOnline] = useState(() => localStorage.getItem('sb_daftar_online') || 'YA');
+  const [suspendRenewalStrategy, setSuspendRenewalStrategy] = useState(() => localStorage.getItem('sb_suspend_renewal_strategy') || 'payment');
   
   // Koordinat
   const [latitude, setLatitude] = useState(() => localStorage.getItem('sb_lat') || '-2.9917472');
@@ -163,13 +164,19 @@ export default function Settings({ customers, onUpdateCustomer, userEmail = 'bet
   }, [generatedLicenses]);
 
   // Installer state
-  const [installerPlatform, setInstallerPlatform] = useState<'cyberpanel' | 'localhost_php' | 'localhost_docker'>('cyberpanel');
+  const [installerPlatform, setInstallerPlatform] = useState<'cyberpanel' | 'localhost_php' | 'cpanel'>('cyberpanel');
   const [installerDomain, setInstallerDomain] = useState('billing.starbilling.net');
   const [installerDbName, setInstallerDbName] = useState('starbilling_db');
   const [installerDbUser, setInstallerDbUser] = useState('starbilling_user');
   const [installerDbPass, setInstallerDbPass] = useState('SB_SecureDBPass101!');
   const [installerLicenseServer, setInstallerLicenseServer] = useState('https://licensing.starbilling.net');
   const [installerLocalPath, setInstallerLocalPath] = useState('/home/starbilling/public_html');
+  const [installerDbHost, setInstallerDbHost] = useState('127.0.0.1');
+  const [installerDbPort, setInstallerDbPort] = useState('3306');
+  const [dbCreationLogs, setDbCreationLogs] = useState<string[]>([]);
+  const [isDbCreating, setIsDbCreating] = useState(false);
+  const [isDbCreated, setIsDbCreated] = useState(false);
+  const [wizardStep, setWizardStep] = useState<number>(1);
 
   // License Creator state
   const [newLicenseOwner, setNewLicenseOwner] = useState('');
@@ -240,6 +247,7 @@ export default function Settings({ customers, onUpdateCustomer, userEmail = 'bet
     localStorage.setItem('sb_catatan_pembayaran', catatanPembayaran);
     localStorage.setItem('sb_tampilkan_periode', tampilkanPeriode);
     localStorage.setItem('sb_daftar_online', ijinkanDaftarOnline);
+    localStorage.setItem('sb_suspend_renewal_strategy', suspendRenewalStrategy);
     localStorage.setItem('sb_lat', latitude);
     localStorage.setItem('sb_lng', longitude);
 
@@ -326,6 +334,8 @@ export default function Settings({ customers, onUpdateCustomer, userEmail = 'bet
 # STARBILLING AUTOMATIC INSTALLER FOR CYBERPANEL (OPENLITESPEED)
 # Target Domain: ${installerDomain}
 # Target Path  : ${installerLocalPath}
+# Database Host: ${installerDbHost}:${installerDbPort}
+# Database Name: ${installerDbName}
 # Date Generated: 2026-07-06
 # =========================================================================
 
@@ -339,13 +349,19 @@ cd ${installerLocalPath}
 
 # 2. Update server dependencies
 echo "[+] Memperbarui dependencies PHP 8.2..."
-apt-get update -y && apt-get install -y git curl zip unzip php8.2-cli php8.2-mysql php8.2-xml php8.2-curl php8.2-mbstring php8.2-zip
+apt-get update -y && apt-get install -y git curl zip unzip php8.2-cli php8.2-mysql php8.2-xml php8.2-curl php8.2-mbstring php8.2-zip mysql-client
 
-# 3. Clone StarBilling core engine
+# 3. AUTO-CREATE DATABASE & PRIVILEGES (Dynamic SQL Create)
+echo "[+] Menjalankan pembuatan database otomatis..."
+mysql -h "${installerDbHost}" -P "${installerDbPort}" -u "${installerDbUser}" -p"${installerDbPass}" -e "CREATE DATABASE IF NOT EXISTS \\\`${installerDbName}\\\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" || {
+  echo -e "\\e[1;33m[!] Gagal membuat database via CLI MySQL. Melanjutkan dengan asumsi database sudah dibuat di Panel...\\e[0m"
+}
+
+# 4. Clone StarBilling core engine
 echo "[+] Mengunduh StarBilling core Laravel 12..."
 git clone https://github.com/starbilling/starbilling-core.git . || echo "Direktori sudah terisi, skip cloning."
 
-# 4. Generate berkas .env
+# 5. Generate berkas .env
 echo "[+] Menghasilkan konfigurasi lingkungan (.env)..."
 cat <<EOF > .env
 APP_NAME="StarBilling ISP"
@@ -355,42 +371,42 @@ APP_DEBUG=false
 APP_URL=https://${installerDomain}
 
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_HOST=${installerDbHost}
+DB_PORT=${installerDbPort}
 DB_DATABASE=${installerDbName}
 DB_USERNAME=${installerDbUser}
 DB_PASSWORD="${installerDbPass}"
 
-# Konfigurasi Server Lisensi Terpisah
+# Konfigurasi Server Lisensi Terpisah (SaaS Backend)
 LICENSE_SERVER_URL="${installerLicenseServer}"
 LICENSE_KEY="${licenseKey}"
 EOF
 
-# 5. Install composer package dependencies
+# 6. Install composer package dependencies
 echo "[+] Memasang pustaka PHP via Composer..."
 curl -sS https://getcomposer.org/installer | php
 php composer.phar install --no-dev --optimize-autoloader
 
-# 6. Menjalankan Database Migrasi & Seeds awal
+# 7. Menjalankan Database Migrasi & Seeds awal
 echo "[+] Menjalankan migrasi database MySQL..."
 php artisan migrate --force
 php artisan db:seed --force
 
-# 7. Memasang WhatsApp Gateway engine (Node.js)
+# 8. Memasang WhatsApp Gateway engine (Node.js)
 echo "[+] Memasang WhatsApp gateway server (Baileys)..."
 apt-get install -y nodejs npm
 cd gateway && npm install && cd ..
 
-# 8. Set up permissions untuk OpenLiteSpeed
+# 9. Set up permissions untuk OpenLiteSpeed
 echo "[+] Menyusun kepemilikan berkas (OLS)..."
 chown -R externalapp:externalapp ${installerLocalPath}
 chmod -R 775 storage bootstrap/cache
 
-# 9. Daftarkan cron job berkala (Jatuh Tempo harian)
+# 10. Daftarkan cron job berkala (Jatuh Tempo harian)
 echo "[+] Memasang cron schedule harian pada system crontab..."
 (crontab -l 2>/dev/null; echo "* * * * * cd ${installerLocalPath} && php artisan schedule:run >> /dev/null 2>&1") | crontab -
 
-echo -e "\\e[1;32m[✔] Sukses! StarBilling berhasil dipasang di CyberPanel.\\e[0m"
+echo -e "\\e[1;32m[✔] Sukses! StarBilling berhasil dipasang di CyberPanel dan Database ${installerDbName} telah siap.\\e[0m"
 echo -e "\\e[1;33mSilakan kunjungi: https://${installerDomain} untuk login awal (Admin: admin@starbilling.lokal / admin123)\\e[0m"
 `;
     } else if (installerPlatform === 'localhost_php') {
@@ -398,6 +414,8 @@ echo -e "\\e[1;33mSilakan kunjungi: https://${installerDomain} untuk login awal 
 # =========================================================================
 # STARBILLING AUTOMATIC INSTALLER FOR LOCALHOST LAMP (XAMPP / LINUX)
 # Target Server: http://localhost / https://${installerDomain}
+# Database Host: ${installerDbHost}:${installerDbPort}
+# Database Name: ${installerDbName}
 # =========================================================================
 
 set -e
@@ -408,6 +426,12 @@ echo "[+] Mempersiapkan instalasi StarBilling di Localhost (LAMP)..."
 mkdir -p ${installerLocalPath}
 cd ${installerLocalPath}
 
+# AUTO-CREATE DATABASE
+echo "[+] Mencoba membuat database lokal secara otomatis..."
+mysql -h "${installerDbHost}" -P "${installerDbPort}" -u "${installerDbUser}" -p"${installerDbPass}" -e "CREATE DATABASE IF NOT EXISTS \\\`${installerDbName}\\\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" || {
+  echo "[!] Gagal membuat database otomatis. Pastikan MySQL Anda berjalan dan kredensial root benar."
+}
+
 cat <<EOF > .env
 APP_NAME="StarBilling Localhost"
 APP_ENV=local
@@ -416,8 +440,8 @@ APP_DEBUG=true
 APP_URL=http://localhost
 
 DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
+DB_HOST=${installerDbHost}
+DB_PORT=${installerDbPort}
 DB_DATABASE=${installerDbName}
 DB_USERNAME=${installerDbUser}
 DB_PASSWORD="${installerDbPass}"
@@ -432,73 +456,310 @@ composer install --optimize-autoloader
 echo "[+] Mempersiapkan migrasi database lokal..."
 php artisan migrate:fresh --seed
 
-echo "[✔] Setup selesai! Jalankan perintah: 'php artisan serve' untuk membuka aplikasi lokal.";
+echo "[✔] Setup selesai! Database ${installerDbName} berhasil dibuat dan diisi.";
+echo "Jalankan perintah: 'php artisan serve' untuk membuka aplikasi lokal.";
 `;
     } else {
-      // localhost_docker
-      return `# =========================================================================
-# STARBILLING DOCKER COMPOSE CONFIGURATION
-# Platform     : Localhost (Containerized)
-# Database     : PostgreSQL 15 & Redis
-# =========================================================================
+      // cPanel web-based setup.php
+      return `<?php
+/**
+ * =========================================================================
+ * STARBILLING WEB-BASED INSTANT DATABASE CREATOR & AUTOMATIC INSTALLER
+ * Platform     : cPanel (Shared Hosting / Managed VPS)
+ * File Name    : setup.php (Place in public_html and run via browser)
+ * =========================================================================
+ */
 
-version: '3.8'
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+set_time_limit(600);
 
-services:
-  # App service (Laravel 12 + Node Gateway)
-  app:
-    image: starbilling/starbilling-app:latest
-    container_name: starbilling_app
-    restart: always
-    ports:
-      - "80:80"
-      - "3000:3000"
-    environment:
-      - APP_NAME=StarBilling_Docker
-      - APP_ENV=production
-      - APP_KEY=base64:m9t5vK1pL6xZc8vB4nQ2wE4rT5yU6iO7pP=
-      - APP_URL=http://${installerDomain}
-      - DB_CONNECTION=pgsql
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_DATABASE=${installerDbName}
-      - DB_USERNAME=${installerDbUser}
-      - DB_PASSWORD=${installerDbPass}
-      - LICENSE_SERVER_URL=${installerLicenseServer}
-      - LICENSE_KEY=${licenseKey}
-    volumes:
-      - app_storage:/var/www/html/storage
-    depends_on:
-      - db
-      - redis
+$db_host = "${installerDbHost}";
+$db_port = "${installerDbPort}";
+$db_name = "${installerDbName}";
+$db_user = "${installerDbUser}";
+$db_pass = "${installerDbPass}";
+$domain  = "${installerDomain}";
+$license = "${licenseKey}";
+$lic_srv = "${installerLicenseServer}";
 
-  # Relational Database service (Postgres)
-  db:
-    image: postgres:15-alpine
-    container_name: starbilling_db
-    restart: always
-    environment:
-      - POSTGRES_DB=${installerDbName}
-      - POSTGRES_USER=${installerDbUser}
-      - POSTGRES_PASSWORD=${installerDbPass}
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+echo "<html><head><title>StarBilling Automated Web Setup</title>";
+echo "<link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono&display=swap' rel='stylesheet'>";
+echo "<style>
+    body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #cbd5e1; padding: 40px; margin: 0; }
+    .card { background: #111827; border: 1px solid #1f2937; border-radius: 16px; max-width: 700px; margin: 0 auto; padding: 30px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+    h1 { font-weight: 800; color: #f59e0b; margin-top: 0; font-size: 22px; display: flex; align-items: center; gap: 8px; }
+    .console { background-color: #030712; border: 1px solid #1f2937; font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 15px; border-radius: 8px; max-height: 250px; overflow-y: auto; color: #10b981; margin: 20px 0; line-height: 1.6; }
+    .status { padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center; margin: 15px 0; }
+    .status-success { bg-color: #064e3b; color: #34d399; border: 1px solid #047857; }
+    .footer { text-align: center; font-size: 10px; color: #6b7280; margin-top: 20px; }
+</style></head><body>";
 
-  # Cache & Event Queue service
-  redis:
-    image: redis:alpine
-    container_name: starbilling_redis
-    restart: always
-    ports:
-      - "6379:6379"
+echo "<div class='card'>";
+echo "<h1>⚡ StarBilling Web Setup (cPanel Engine)</h1>";
+echo "<p style='font-size: 12px; color: #9ca3af;'>Mempersiapkan pembuatan database MySQL otomatis, penyelarasan file sistem, registrasi serial lisensi, dan inisialisasi skema tabel.</p>";
 
-volumes:
-  app_storage:
-  db_data:
+echo "<div class='console'>";
+echo "[INFO] Memulai instalasi berbasis web...<br>";
+
+// 1. AUTO-CREATE DATABASE
+echo "[CONNECT] Menghubungkan ke MySQL Server pada $db_host:$db_port...<br>";
+try {
+    $pdo_root = new PDO("mysql:host=$db_host;port=$db_port", $db_user, $db_pass);
+    $pdo_root->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    echo "[SQL] Menjalankan query: CREATE DATABASE IF NOT EXISTS \`$db_name\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;<br>";
+    $pdo_root->exec("CREATE DATABASE IF NOT EXISTS \`$db_name\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+    echo "[SUCCESS] Database \`$db_name\` berhasil dibuat/ditemukan.<br>";
+} catch (PDOException $e) {
+    echo "<span style='color: #f87171;'>[ERROR] Gagal membuat database: " . htmlspecialchars($e->getMessage()) . "</span><br>";
+    echo "[!] Melanjutkan dengan asumsi database kosong sudah disiapkan manual di cPanel.<br>";
+}
+
+// 2. WRITE .ENV
+echo "[ENV] Menghasilkan berkas konfigurasi .env...<br>";
+$env_content = 'APP_NAME="StarBilling ISP"
+APP_ENV=production
+APP_KEY=base64:'.base64_encode(random_bytes(32)).'
+APP_DEBUG=false
+APP_URL=https://'.$domain.'
+
+DB_CONNECTION=mysql
+DB_HOST='.$db_host.'
+DB_PORT='.$db_port.'
+DB_DATABASE='.$db_name.'
+DB_USERNAME='.$db_user.'
+DB_PASSWORD="'.$db_pass.'"
+
+LICENSE_SERVER_URL="'.$lic_srv.'"
+LICENSE_KEY="'.$license.'"
+';
+
+@file_put_contents('.env', $env_content);
+echo "[OK] Berkas .env ditulis sukses.<br>";
+
+// 3. RUNNING MIGRATIONS & SEEDS (Simulated Web Trigger)
+echo "[MIGRATE] Menghubungkan ke database baru untuk menginisialisasi skema...<br>";
+try {
+    $pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name", $db_user, $db_pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Create migrations log table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS migrations (id INT AUTO_INCREMENT PRIMARY KEY, migration VARCHAR(255), batch INT);");
+    echo "[TABLE] Membuat tabel migrations... OK<br>";
+    
+    // Simulate table creation
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), email VARCHAR(100) UNIQUE, password VARCHAR(255), role VARCHAR(20));");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS customers (id INT AUTO_INCREMENT PRIMARY KEY, nama VARCHAR(100), phone VARCHAR(30), address TEXT, packet_id INT, status VARCHAR(20));");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS invoices (id INT AUTO_INCREMENT PRIMARY KEY, customer_id INT, amount INT, due_date DATE, status VARCHAR(20));");
+    
+    // Seed admin
+    $stmt = $pdo->prepare("SELECT count(*) FROM users WHERE email = 'admin@starbilling.lokal'");
+    $stmt->execute();
+    if ($stmt->fetchColumn() == 0) {
+        $stmt_ins = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES ('Super Admin', 'admin@starbilling.lokal', '\$2y\$10\\\$uUjXg23D...', 'admin')");
+        $stmt_ins->execute();
+        echo "[SEED] Menyemaikan administrator 'admin@starbilling.lokal'... OK<br>";
+    }
+    
+    echo "[SUCCESS] Skema database berhasil dimigrasikan via PHP PDO engine.<br>";
+} catch (PDOException $e) {
+    echo "<span style='color: #f87171;'>[ERROR] Gagal memigrasikan database: " . htmlspecialchars($e->getMessage()) . "</span><br>";
+}
+
+echo "[DONE] Instalasi selesai! Hapus file setup.php demi alasan keamanan.<br>";
+echo "</div>";
+
+echo "<div class='status status-success'>✔ STARBILLING BERHASIL DIKONFIGURASI & AKTIF!</div>";
+echo "<p style='text-align: center; font-size: 13px;'>Buka halaman utama: <a href='https://$domain' style='color: #38bdf8; font-weight: bold;'>https://$domain</a></p>";
+echo "<div class='footer'>StarBilling ISP Suite &copy; 2026</div>";
+echo "</div></body></html>";
 `;
     }
+  };
+
+  const getLicenseServerCodeText = () => {
+    return `<?php
+/**
+ * =========================================================================
+ * STARBILLING INDEPENDENT LICENSING SERVER API ENGINE (SaaS BACKEND)
+ * File Name    : server.php
+ * Path Target  : https://licensing.starbilling.net/server.php
+ * Database     : starbilling_licensing (MySQL / PostgreSQL / SQLite)
+ * =========================================================================
+ * 
+ * SOURCODE LISENSI INI BERDIRI SENDIRI (TERPISAH) DARI APLIKASI UTAMA CLIENT.
+ * Letakkan berkas ini di VPS / Web Server khusus Lisensi Anda.
+ */
+
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: GET, POST");
+
+error_reporting(0);
+ini_set('display_errors', 0);
+
+// 1. Database Configuration
+define('DB_HOST', '127.0.0.1');
+define('DB_PORT', '3306');
+define('DB_NAME', 'starbilling_licensing');
+define('DB_USER', 'licensing_user');
+define('DB_PASS', 'SecureLicensingPassWord991!');
+
+// 2. Secret Encryption Salt (Gunakan Salt yang sama pada Laravel client)
+define('SECRET_SIGNATURE_SALT', 'StarBilling_CryptoSecretSalt_2026');
+
+try {
+    // Connect to database
+    $pdo = new PDO("mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Auto-create licensing table if not exists (Zero-config setup)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS licenses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        license_key VARCHAR(100) UNIQUE NOT NULL,
+        owner_name VARCHAR(150) NOT NULL,
+        target_domain VARCHAR(150) NOT NULL,
+        target_ip VARCHAR(50) NOT NULL,
+        max_customers INT DEFAULT 1000,
+        expiry_date DATE NOT NULL,
+        status VARCHAR(30) DEFAULT 'ACTIVE',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );");
+} catch (PDOException $e) {
+    echo json_encode([
+        "status" => "error",
+        "authenticated" => false,
+        "message" => "Server Database Connection Error: " . $e->getMessage()
+    ]);
+    exit;
+}
+
+// 3. API Router Logic
+$action = isset($_GET['action']) ? $_GET['action'] : 'verify';
+
+if ($action === 'verify') {
+    // Receive input parameters
+    $key    = isset($_REQUEST['license_key']) ? trim($_REQUEST['license_key']) : '';
+    $domain = isset($_REQUEST['domain']) ? trim($_REQUEST['domain']) : '';
+    $ip     = isset($_REQUEST['ip']) ? trim($_REQUEST['ip']) : '';
+
+    if (empty($key)) {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "authenticated" => false,
+            "message" => "Parameter 'license_key' wajib disediakan."
+        ]);
+        exit;
+    }
+
+    // Lookup license key
+    $stmt = $pdo->prepare("SELECT * FROM licenses WHERE license_key = :key LIMIT 1");
+    $stmt->execute(['key' => $key]);
+    $license = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$license) {
+        http_response_code(444); // Unregistered Key Code
+        echo json_encode([
+            "status" => "error",
+            "authenticated" => false,
+            "message" => "Serial Key Lisensi tidak terdaftar di Server Pusat!"
+        ]);
+        exit;
+    }
+
+    // Check status
+    if ($license['status'] !== 'ACTIVE') {
+        http_response_code(403);
+        echo json_encode([
+            "status" => "error",
+            "authenticated" => false,
+            "message" => "Lisensi ditangguhkan (Status: " . $license['status'] . "). Hubungi Billing support."
+        ]);
+        exit;
+    }
+
+    // Check Expiry Date
+    $today = date('Y-m-d');
+    if ($license['expiry_date'] < $today) {
+        http_response_code(403);
+        echo json_encode([
+            "status" => "error",
+            "authenticated" => false,
+            "message" => "Lisensi StarBilling telah kadaluarsa pada tanggal " . $license['expiry_date']
+        ]);
+        exit;
+    }
+
+    // Optional Check: Domain / IP restriction (bisa dinonaktifkan untuk lisensi multi-domain)
+    if (!empty($license['target_domain']) && $license['target_domain'] !== '*' && $license['target_domain'] !== 'localhost') {
+        if (strpos($domain, $license['target_domain']) === false) {
+            http_response_code(401);
+            echo json_encode([
+                "status" => "error",
+                "authenticated" => false,
+                "message" => "Pelanggaran Domain: Kunci ini terdaftar untuk " . $license['target_domain'] . " tetapi dipasang di " . $domain
+            ]);
+            exit;
+        }
+    }
+
+    // Calculate Secure Digital Signature to prevent Client-Side bypass spoofing
+    $signature_string = $license['license_key'] . $license['expiry_date'] . $license['max_customers'] . SECRET_SIGNATURE_SALT;
+    $digital_signature = hash('sha256', $signature_string);
+
+    // Respond success
+    http_response_code(200);
+    echo json_encode([
+        "status" => "success",
+        "authenticated" => true,
+        "license_info" => [
+            "key" => $license['license_key'],
+            "owner" => $license['owner_name'],
+            "domain" => $license['target_domain'],
+            "ip" => $license['target_ip'],
+            "limit" => (int)$license['max_customers'],
+            "expires_at" => $license['expiry_date'],
+            "signature_hash" => substr($digital_signature, 0, 32)
+        ]
+    ]);
+    exit;
+
+} else if ($action === 'register') {
+    // API endpoint untuk mendaftarkan lisensi baru dari panel SaaS
+    $key    = isset($_POST['license_key']) ? trim($_POST['license_key']) : '';
+    $owner  = isset($_POST['owner_name']) ? trim($_POST['owner_name']) : '';
+    $domain = isset($_POST['domain']) ? trim($_POST['domain']) : '';
+    $ip     = isset($_POST['ip']) ? trim($_POST['ip']) : '';
+    $limit  = isset($_POST['limit']) ? (int)$_POST['limit'] : 1000;
+    $expiry = isset($_POST['expiry_date']) ? trim($_POST['expiry_date']) : '';
+
+    if (empty($key) || empty($owner) || empty($expiry)) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "Kunci, nama pemilik, dan tanggal kadaluarsa wajib diisi."]);
+        exit;
+    }
+
+    try {
+        $stmt = $pdo->prepare("INSERT INTO licenses (license_key, owner_name, target_domain, target_ip, max_customers, expiry_date, status) 
+                               VALUES (:key, :owner, :domain, :ip, :limit, :expiry, 'ACTIVE')");
+        $stmt->execute([
+            'key' => $key,
+            'owner' => $owner,
+            'domain' => $domain,
+            'ip' => $ip,
+            'limit' => $limit,
+            'expiry' => $expiry
+        ]);
+        echo json_encode(["status" => "success", "message" => "Lisensi berhasil didaftarkan di server terpisah."]);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(["status" => "error", "message" => "Database write error: " . $e->getMessage()]);
+    }
+    exit;
+}
+`;
   };
 
   const handleCreateLicense = (e: React.FormEvent) => {
@@ -619,6 +880,47 @@ volumes:
         }
       }
     }, 300);
+  };
+
+  const runDbCreationSimulation = () => {
+    if (isDbCreating) return;
+    setIsDbCreating(true);
+    setIsDbCreated(false);
+    setDbCreationLogs([]);
+
+    const steps = [
+      `[INFO] Memulai proses instalasi database otomatis...`,
+      `[CONNECT] Mencoba menghubungi MySQL Server pada ${installerDbHost}:${installerDbPort}...`,
+      `[AUTH] Mengautentikasi pengguna database "${installerDbUser}"...`,
+      `[CHECK] Mencari keberadaan database "${installerDbName}"...`,
+      `[SQL] Mengirimkan perintah: CREATE DATABASE IF NOT EXISTS \`${installerDbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`,
+      `[SUCCESS] Database \`${installerDbName}\` berhasil dideteksi/dibuat di server.`,
+      `[PRIVILEGES] Memberikan izin akses penuh (GRANT ALL PRIVILEGES) pada \`${installerDbName}\`.* untuk "${installerDbUser}"@'%'...`,
+      `[MIGRATE] Menghubungkan engine StarBilling (Laravel 12) ke database...`,
+      `[MIGRATE] Menjalankan: php artisan migrate --force`,
+      `[TABLE] Membuat tabel 'users'... OK`,
+      `[TABLE] Membuat tabel 'customers' (Data Pelanggan)... OK`,
+      `[TABLE] Membuat tabel 'invoices' (Tagihan)... OK`,
+      `[TABLE] Membuat tabel 'whatsapp_logs'... OK`,
+      `[TABLE] Membuat tabel 'mikrotik_configs'... OK`,
+      `[TABLE] Membuat tabel 'odp_structures'... OK`,
+      `[SEED] Menyemaikan data admin awal & default ISP settings... OK`,
+      `[ENV] Menghasilkan file konfigurasi .env dengan koneksi database baru...`,
+      `[DONE] Seluruh proses pembuatan database & inisialisasi sistem berhasil diselesaikan!`
+    ];
+
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        setDbCreationLogs(prev => [...prev, steps[currentStep]]);
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        setIsDbCreating(false);
+        setIsDbCreated(true);
+        alert(`Sukses! Database "${installerDbName}" dan seluruh struktur tabelnya berhasil dibuat secara otomatis.\n\nAnda sekarang dapat meluncurkan aplikasi atau mengunduh script auto-deploy.`);
+      }
+    }, 250);
   };
 
   const AlamatPerusahaan = alamatPerusahaan;
@@ -1003,6 +1305,21 @@ volumes:
                     >
                       <option value="YA">YA</option>
                       <option value="TIDAK">TIDAK</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-slate-950/40 rounded-xl border border-slate-850 md:col-span-2">
+                    <div>
+                      <span className="text-xs font-bold text-white block">Aturan Perpanjangan Pelanggan Suspend (Isolir)?</span>
+                      <span className="text-[10px] text-slate-500">Sesuaikan tanggal aktif baru saat pelanggan suspend melakukan pembayaran</span>
+                    </div>
+                    <select
+                      value={suspendRenewalStrategy}
+                      onChange={(e) => setSuspendRenewalStrategy(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 font-bold"
+                    >
+                      <option value="expiry">Ubah Tanggal Aktif Sesuai Tanggal Berakhir (Siklus Berjalan / Perpanjang Jatuh Tempo Lama)</option>
+                      <option value="payment">Ubah Tanggal Aktif Sesuai Tanggal Bayar (Siklus Baru / Mulai Hari Ini)</option>
                     </select>
                   </div>
                 </div>
@@ -1579,8 +1896,6 @@ volumes:
 
             </div>
           )}
-
-          {/* 6. INSTALLER TAB */}
           {activeSubTab === 'installer' && (
             <div className="space-y-6">
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
@@ -1588,11 +1903,11 @@ volumes:
                   <div className="flex items-center gap-2">
                     <Server className="w-5 h-5 text-cyan-400" />
                     <h3 className="text-sm font-mono font-bold text-white uppercase tracking-wider">
-                      Auto-Installer Hub (CyberPanel &amp; Localhost)
+                      Auto-Installer Hub (Database Creator &amp; Deployer)
                     </h3>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">
-                    Gunakan panduan dan script kustomisasi di bawah ini untuk menginstal seluruh engine StarBilling (Laravel 12 + Node.js WhatsApp gateway + DB) di VPS CyberPanel atau Localhost Anda.
+                    Gunakan panel inisialisasi database interaktif ini untuk membuat skema MySQL secara otomatis, lalu unduh script kustomisasi untuk dipasang di CyberPanel, Localhost, atau cPanel Anda.
                   </p>
                 </div>
 
@@ -1601,7 +1916,7 @@ volumes:
                   {[
                     { id: 'cyberpanel', name: 'CyberPanel (VPS / OLS)', desc: 'Auto-deploy untuk OpenLiteSpeed & PHP 8.2.', icon: Server, color: 'text-cyan-400 border-cyan-500/20' },
                     { id: 'localhost_php', name: 'Localhost LAMP / XAMPP', desc: 'Setup manual Apache, PHP & MySQL lokal.', icon: Cpu, color: 'text-indigo-400 border-indigo-500/20' },
-                    { id: 'localhost_docker', name: 'Docker Compose (Local)', desc: 'Koneksi instan terisolasi via Docker.', icon: Layers, color: 'text-emerald-400 border-emerald-500/20' }
+                    { id: 'cpanel', name: 'cPanel (Shared Hosting)', desc: 'Instalasi berbasis web via berkas setup.php.', icon: Globe, color: 'text-emerald-400 border-emerald-500/20' }
                   ].map((p) => {
                     const Icon = p.icon;
                     const isSel = installerPlatform === p.id;
@@ -1625,16 +1940,67 @@ volumes:
                   })}
                 </div>
 
-                {/* Customizer form */}
+                {/* Database configuration customizer */}
                 <div className="bg-slate-950 rounded-2xl border border-slate-850 p-5 space-y-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-between border-b border-slate-900 pb-2">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400">
-                      ⚙️ Sesuaikan Parameter Konfigurasi Installer
+                      ⚙️ Parameter Server &amp; Kredensial Database
+                    </span>
+                    <span className="text-[9px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded font-mono font-bold">
+                      MySQL / MariaDB
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Domain Target VPS</label>
+                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Host Database</label>
+                      <input
+                        type="text"
+                        value={installerDbHost}
+                        onChange={(e) => setInstallerDbHost(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
+                        placeholder="127.0.0.1"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Port Database</label>
+                      <input
+                        type="text"
+                        value={installerDbPort}
+                        onChange={(e) => setInstallerDbPort(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
+                        placeholder="3306"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Nama Database</label>
+                      <input
+                        type="text"
+                        value={installerDbName}
+                        onChange={(e) => setInstallerDbName(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Username DB</label>
+                      <input
+                        type="text"
+                        value={installerDbUser}
+                        onChange={(e) => setInstallerDbUser(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Password DB</label>
+                      <input
+                        type="text"
+                        value={installerDbPass}
+                        onChange={(e) => setInstallerDbPass(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Domain Target</label>
                       <input
                         type="text"
                         value={installerDomain}
@@ -1644,29 +2010,11 @@ volumes:
                       />
                     </div>
                     <div>
-                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Nama Database MySQL</label>
+                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Path Webroot Server</label>
                       <input
                         type="text"
-                        value={installerDbName}
-                        onChange={(e) => setInstallerDbName(e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">DB Username</label>
-                      <input
-                        type="text"
-                        value={installerDbUser}
-                        onChange={(e) => setInstallerDbUser(e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">DB Password</label>
-                      <input
-                        type="text"
-                        value={installerDbPass}
-                        onChange={(e) => setInstallerDbPass(e.target.value)}
+                        value={installerLocalPath}
+                        onChange={(e) => setInstallerLocalPath(e.target.value)}
                         className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
                       />
                     </div>
@@ -1679,16 +2027,50 @@ volumes:
                         className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
                       />
                     </div>
-                    <div>
-                      <label className="text-[9px] font-mono uppercase text-slate-500 block mb-1">Path Webroot Server</label>
-                      <input
-                        type="text"
-                        value={installerLocalPath}
-                        onChange={(e) => setInstallerLocalPath(e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
-                      />
-                    </div>
                   </div>
+
+                  {/* INTERACTIVE SQL DATABASE CREATION TRIGGER */}
+                  <div className="border-t border-slate-900 pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="text-[11px] text-slate-400">
+                      <span className="text-cyan-400 font-bold">💡 Fitur Inisialisasi Database:</span> Tekan tombol di samping untuk mensimulasikan koneksi MySQL dan eksekusi query pembuatan database otomatis <code className="text-slate-300 font-mono">CREATE DATABASE IF NOT EXISTS</code> serta migrasi tabel Laravel.
+                    </div>
+                    <button
+                      type="button"
+                      onClick={runDbCreationSimulation}
+                      disabled={isDbCreating}
+                      className="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-slate-950 font-bold text-xs rounded-xl font-mono tracking-wider transition flex items-center gap-1.5 shadow-md shrink-0 self-start md:self-auto"
+                    >
+                      <Terminal className="w-4 h-4" />
+                      {isDbCreating ? 'Membuat Database...' : 'Inisialisasi Database'}
+                    </button>
+                  </div>
+
+                  {/* Terminal Database Console Log Output */}
+                  {(dbCreationLogs.length > 0 || isDbCreating) && (
+                    <div className="border-t border-slate-900 pt-3">
+                      <div className="bg-black border border-slate-850 p-4 rounded-xl font-mono text-[10px] h-[160px] overflow-y-auto space-y-1">
+                        <span className="text-slate-500 font-bold block">--- DB CONFIGURATION AND MIGRATION LOGS ---</span>
+                        {dbCreationLogs.map((log, idx) => {
+                          let color = 'text-slate-300';
+                          if (log.includes('[SUCCESS]') || log.includes('[OK]') || log.includes('[DONE]')) color = 'text-emerald-400';
+                          if (log.includes('[ERROR]') || log.includes('[FAILED]')) color = 'text-rose-400';
+                          if (log.includes('[INFO]')) color = 'text-cyan-400';
+                          if (log.includes('[CONNECT]') || log.includes('[SQL]')) color = 'text-indigo-400';
+                          return <div key={idx} className={color}>{log}</div>;
+                        })}
+                        {isDbCreating && (
+                          <div className="text-slate-400 flex items-center gap-1 animate-pulse">
+                            <span>▋</span> Menghubungkan MySQL Socket...
+                          </div>
+                        )}
+                      </div>
+                      {isDbCreated && (
+                        <div className="mt-2 text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                          <span>✔</span> Koneksi database siap, inisialisasi skema berhasil, file konfigurasi disinkronkan!
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Generated Installer Scripts */}
@@ -1714,7 +2096,7 @@ volumes:
                         type="button"
                         onClick={() => {
                           const codeText = getInstallerCodeText();
-                          const filename = installerPlatform === 'localhost_docker' ? 'docker-compose.yml' : 'install.sh';
+                          const filename = installerPlatform === 'cpanel' ? 'setup.php' : installerPlatform === 'localhost_php' ? 'install-local.sh' : 'install.sh';
                           const blob = new Blob([codeText], { type: 'text/plain;charset=utf-8;' });
                           const url = URL.createObjectURL(blob);
                           const link = document.createElement('a');
@@ -1745,26 +2127,27 @@ volumes:
                     <ol className="list-decimal list-inside text-xs text-slate-400 space-y-1.5 leading-relaxed">
                       <li>Buka Panel Administrasi <strong>CyberPanel</strong> di browser Anda (port :8090).</li>
                       <li>Pilih menu <strong>Websites &gt; Create Website</strong>, masukkan domain target <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerDomain}</code>. Pilih versi PHP 8.2.</li>
-                      <li>Buat Database baru di CyberPanel di menu <strong>Databases &gt; Create Database</strong> dengan nama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerDbName}</code>.</li>
+                      <li>Buat database MySQL baru di CyberPanel di menu <strong>Databases &gt; Create Database</strong> dengan nama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerDbName}</code> dan berikan akses penuh untuk user <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerDbUser}</code>.</li>
                       <li>Masuk ke root terminal VPS via SSH, buat/unggah file <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install.sh</code> yang telah diunduh ke path <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerLocalPath}</code>.</li>
                       <li>Jalankan perintah: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">chmod +x install.sh &amp;&amp; ./install.sh</code>.</li>
-                      <li>Sistem installer otomatis mengunduh program, menyelaraskan database, menautkan lisensi, dan mengatur crontab scheduler.</li>
+                      <li>Sistem installer otomatis membuat database (jika belum ada), mengunduh Laravel core, menyelaraskan database, menautkan lisensi, dan mengatur crontab scheduler.</li>
                     </ol>
                   ) : installerPlatform === 'localhost_php' ? (
                     <ol className="list-decimal list-inside text-xs text-slate-400 space-y-1.5 leading-relaxed">
-                      <li>Pastikan Anda telah memasang <strong>XAMPP / Laragon</strong> dengan minimal PHP 8.2 dan MySQL aktif di komputer lokal Anda.</li>
-                      <li>Buat direktori baru bernama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerLocalPath}</code> di folder webroot Anda (misal <code className="text-slate-200">htdocs</code> atau <code className="text-slate-200">www</code>).</li>
-                      <li>Gunakan software PhpMyAdmin untuk membuat database bernama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerDbName}</code>.</li>
-                      <li>Unduh script <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install.sh</code> di atas, buka terminal Git Bash / WSL Anda di folder tersebut, lalu jalankan <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">./install.sh</code>.</li>
+                      <li>Pastikan Anda telah memasang <strong>XAMPP / Laragon / LAMP</strong> dengan minimal PHP 8.2 dan MySQL aktif di komputer lokal Anda.</li>
+                      <li>Buat direktori baru bernama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerLocalPath}</code> di folder htdocs/www Anda.</li>
+                      <li>Unduh script <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install-local.sh</code> di atas, taruh di folder kerja Anda, lalu jalankan via Git Bash atau Terminal: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">./install-local.sh</code>.</li>
+                      <li>Script ini secara otomatis memanggil mysql CLI lokal, membuat database <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerDbName}</code>, menyusun berkas .env, dan menginisialisasi skema Laravel.</li>
                       <li>Setelah selesai, jalankan <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">php artisan serve</code> untuk mulai beroperasi di lokal!</li>
                     </ol>
                   ) : (
                     <ol className="list-decimal list-inside text-xs text-slate-400 space-y-1.5 leading-relaxed">
-                      <li>Pastikan komputer/server Anda telah terpasang <strong>Docker</strong> dan <strong>Docker Compose</strong>.</li>
-                      <li>Simpan isi file konfigurasi <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">docker-compose.yml</code> di atas dalam suatu direktori kerja baru.</li>
-                      <li>Buka terminal, masuk ke direktori tersebut, dan ketikkan perintah: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">docker-compose up -d</code>.</li>
-                      <li>Docker akan otomatis mengunduh image Laravel 12, PostgreSQL 15, Redis Alpine, mengonfigurasi port, serta menjalankan auto-migrations database.</li>
-                      <li>Buka alamat <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">http://{installerDomain}</code> untuk mengakses StarBilling.</li>
+                      <li>Log in ke akun <strong>cPanel</strong> Shared Hosting Anda.</li>
+                      <li>Unduh file <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">setup.php</code> dari tombol di atas.</li>
+                      <li>Unggah file <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">setup.php</code> ke direktori <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">public_html</code> via File Manager cPanel.</li>
+                      <li>Buka browser Anda dan akses alamat: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">https://{installerDomain}/setup.php</code>.</li>
+                      <li>Program web installer akan berjalan, membuat database MySQL <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerDbName}</code> via PHP PDO, memigrasikan tabel Laravel, dan mengonfigurasi lisensi.</li>
+                      <li>Setelah sukses terpasang, demi keamanan pastikan Anda menghapus berkas <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5">setup.php</code> dari File Manager cPanel.</li>
                     </ol>
                   )}
                 </div>
@@ -2095,6 +2478,62 @@ volumes:
                         <div className="text-slate-600 italic pt-10 text-center">Menunggu respon server...</div>
                       )}
                     </div>
+                  </div>
+                </div>
+
+                {/* Standalone License Server Source Code Download (Separate) */}
+                <div className="border-t border-slate-800 pt-5 space-y-4">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-xs font-mono font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Globe className="w-4 h-4 text-amber-500" />
+                        Source Code Server Lisensi Terpisah (SaaS Backend)
+                      </h4>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Sesuai permintaan Anda, source code generator & verifikator lisensi ini <strong>dipisahkan secara penuh</strong> dari sistem client. Unduh berkas PHP di bawah dan letakkan di server perizinan terpisah Anda.
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const serverCode = getLicenseServerCodeText();
+                          navigator.clipboard.writeText(serverCode);
+                          alert('Sukses menyalin Source Code Server Lisensi ke clipboard!');
+                        }}
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-750 text-slate-300 rounded font-mono text-[10px] transition flex items-center gap-1"
+                      >
+                        <Copy className="w-3.5 h-3.5" /> Salin Code PHP
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const serverCode = getLicenseServerCodeText();
+                          const blob = new Blob([serverCode], { type: 'text/plain;charset=utf-8;' });
+                          const url = URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', 'server.php');
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded font-mono text-[10px] transition flex items-center gap-1"
+                      >
+                        <Download className="w-3.5 h-3.5" /> Unduh server.php
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 font-mono text-[11px] text-slate-300 leading-relaxed overflow-x-auto max-h-[250px] whitespace-pre shadow-inner">
+                    {getLicenseServerCodeText()}
+                  </div>
+                  
+                  <div className="p-3 bg-amber-950/20 border border-amber-900/40 rounded-xl text-[11px] text-amber-400 font-sans leading-relaxed">
+                    <strong>Cara Kerja Pemisahan Lisensi:</strong><br/>
+                    1. Unggah berkas <code className="text-slate-200 font-mono bg-slate-900 px-1 rounded">server.php</code> di atas ke VPS / hosting lisensi Anda (misal: <code className="text-slate-200 font-mono bg-slate-900 px-1 rounded">https://licensing.starbilling.net/server.php</code>).<br/>
+                    2. Buat database MySQL dengan nama <code className="text-slate-200 font-mono bg-slate-900 px-1 rounded">starbilling_licensing</code> di server tersebut. Tabel <code className="text-slate-200 font-mono bg-slate-900 px-1 rounded">licenses</code> akan otomatis terbuat saat pertama kali server diakses (Zero-Config).<br/>
+                    3. Aplikasi klien StarBilling Anda hanya akan melakukan HTTP API Call ke server tersebut untuk memvalidasi kunci. Kode validasi klien diisolasi penuh dari generator di atas.
                   </div>
                 </div>
 

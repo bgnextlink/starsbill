@@ -35,7 +35,7 @@ interface CustomerPortalProps {
   tickets: Ticket[];
   packages: InternetPackage[];
   onAddTicket: (ticket: Ticket) => void;
-  onPayInvoice: (id: string, method: string, reference: string) => void;
+  onPayInvoice: (id: string, method: string, reference: string, overrideStrategy?: 'expiry' | 'payment') => void;
   onSendWhatsapp: (recipient: string, message: string, type: string) => void;
   onLogout?: () => void;
   onUpdateCustomer?: (updatedCust: Customer) => void;

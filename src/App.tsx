@@ -210,9 +210,16 @@ export default function App() {
   };
 
   // Pay invoice callback simulation
-  const handlePayInvoice = (invoiceId: string, method: string, reference: string) => {
+  const handlePayInvoice = (invoiceId: string, method: string, reference: string, overrideStrategy?: 'expiry' | 'payment') => {
     let invoiceAmount = 0;
     let customerId = '';
+    let invoiceDueDate = '';
+
+    // Find the invoice to retrieve amount, customer ID, and due date
+    const targetInvoice = invoices.find(i => i.id === invoiceId);
+    if (targetInvoice) {
+      invoiceDueDate = targetInvoice.due_date;
+    }
 
     setInvoices(prev => prev.map(inv => {
       if (inv.id === invoiceId) {
@@ -228,11 +235,22 @@ export default function App() {
       return inv;
     }));
 
-    // Update customer status to Aktif if suspended
+    // Update customer status to Aktif if suspended, adjusting their active date
     if (customerId) {
+      const configStrategy = localStorage.getItem('sb_suspend_renewal_strategy') || 'payment';
+      const strategy = overrideStrategy || (configStrategy as 'expiry' | 'payment');
+
       setCustomers(prev => prev.map(c => {
         if (c.id === customerId && c.status === 'Suspend') {
-          return { ...c, status: 'Aktif' };
+          const todayStr = new Date().toISOString().split('T')[0];
+          // UBAH TANGGAL AKTIF SESUAI TANGGAL BERAKHIR vs TANGGAL BAYAR
+          const newTanggalAktif = strategy === 'expiry' ? (invoiceDueDate || todayStr) : todayStr;
+          
+          return { 
+            ...c, 
+            status: 'Aktif',
+            tanggal_aktif: newTanggalAktif
+          };
         }
         return c;
       }));

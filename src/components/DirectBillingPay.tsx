@@ -34,7 +34,7 @@ interface DirectBillingPayProps {
   invoices: Invoice[];
   packages: InternetPackage[];
   areas?: Area[];
-  onPayInvoice: (invoiceId: string, method: string, reference: string) => void;
+  onPayInvoice: (invoiceId: string, method: string, reference: string, overrideStrategy?: 'expiry' | 'payment') => void;
   onSendWhatsapp: (recipient: string, message: string, type: string) => void;
   onBackToAdmin?: () => void;
 }
@@ -54,6 +54,7 @@ export default function DirectBillingPay({
   const [customerInvoices, setCustomerInvoices] = useState<Invoice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [renewalStrategy, setRenewalStrategy] = useState<'expiry' | 'payment'>('payment');
   
   // Checkout & Payment states
   const [activeInvoice, setActiveInvoice] = useState<Invoice | null>(null);
@@ -195,7 +196,7 @@ export default function DirectBillingPay({
       selectedMethod.replace('va_', 'Virtual Account ').toUpperCase();
 
     // Trigger parent state update
-    onPayInvoice(activeInvoice.id, methodLabel, ref);
+    onPayInvoice(activeInvoice.id, methodLabel, ref, renewalStrategy);
     
     // Simulate WhatsApp Dispatch
     const waText = `*[STARBILLING.lokal - NOTIFIKASI BAYAR LUNAS]*\n\nHalo Kak *${selectedCustomer.name}*,\n\nPembayaran tagihan Anda dengan Invoice *${activeInvoice.invoice_number}* sebesar *Rp ${activeInvoice.amount.toLocaleString('id-ID')}* via *${methodLabel}* TELAH BERHASIL DITERIMA.\n\nSistem Mikrotik RouterOS dan TR-069 ACS telah memperbarui status PPPoE / ONU Anda. Layanan internet Anda kini AKTIF penuh kembali.\n\nTerima kasih atas kepercayaan Anda menggunakan layanan kami.`;
@@ -700,6 +701,43 @@ export default function DirectBillingPay({
                           <p className="text-[11px] text-slate-400 leading-relaxed">
                             Simulasikan callback lunas instan seakan-akan dikirim oleh Payment Gateway (Midtrans/Tripay) secara real-time ke endpoint callback STARBILLING.
                           </p>
+
+                          {selectedCustomer.status === 'Suspend' && (
+                            <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl space-y-2 text-xs">
+                              <span className="text-[10px] font-mono font-bold text-cyan-400 block uppercase tracking-wider">
+                                Aturan Perpanjangan Pelanggan Suspend (Isolir)
+                              </span>
+                              <div className="space-y-2 text-[11px] text-slate-300">
+                                <label className="flex items-start gap-2 cursor-pointer">
+                                  <input 
+                                    type="radio" 
+                                    name="quickpayRenewalStrategy"
+                                    checked={renewalStrategy === 'expiry'} 
+                                    onChange={() => setRenewalStrategy('expiry')}
+                                    className="mt-0.5 text-cyan-500 focus:ring-0 focus:ring-offset-0 bg-slate-950 border-slate-800" 
+                                  />
+                                  <div>
+                                    <strong className="block text-slate-200">UBAH TANGGAL AKTIF SESUAI TANGGAL BERAKHIR</strong>
+                                    <span className="text-[10px] text-slate-500">Masa aktif mengikuti tanggal jatuh tempo / berakhirnya masa billing lama ({activeInvoice.due_date}).</span>
+                                  </div>
+                                </label>
+                                <label className="flex items-start gap-2 cursor-pointer">
+                                  <input 
+                                    type="radio" 
+                                    name="quickpayRenewalStrategy"
+                                    checked={renewalStrategy === 'payment'} 
+                                    onChange={() => setRenewalStrategy('payment')}
+                                    className="mt-0.5 text-cyan-500 focus:ring-0 focus:ring-offset-0 bg-slate-950 border-slate-800" 
+                                  />
+                                  <div>
+                                    <strong className="block text-slate-200">UBAH TANGGAL AKTIF SESUAI TANGGAL BAYAR</strong>
+                                    <span className="text-[10px] text-slate-500">Masa aktif mulai ulang per tanggal hari ini / tanggal bayar ({new Date().toISOString().split('T')[0]}).</span>
+                                  </div>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
                           <button
                             type="button"
                             onClick={simulatePaymentWebhook}

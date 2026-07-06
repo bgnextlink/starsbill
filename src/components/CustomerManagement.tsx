@@ -1105,6 +1105,13 @@ export default function CustomerManagement({
             >
               <span>📥 Export CSV</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setIsImportOpen(true)}
+              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition uppercase tracking-wider"
+            >
+              <span>📤 Import CSV</span>
+            </button>
           </div>
 
           {/* Column Toggle Picker */}

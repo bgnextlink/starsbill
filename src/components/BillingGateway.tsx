@@ -27,7 +27,7 @@ interface BillingGatewayProps {
   customers: Customer[];
   packages: InternetPackage[];
   onGenerateMassal: () => void;
-  onPayInvoice: (id: string, method: string, reference: string) => void;
+  onPayInvoice: (id: string, method: string, reference: string, overrideStrategy?: 'expiry' | 'payment') => void;
   onSendWhatsapp: (recipient: string, message: string, type: string) => void;
 }
 
@@ -48,6 +48,7 @@ export default function BillingGateway({
   const [callbackInvoiceId, setCallbackInvoiceId] = useState('');
   const [callbackGateway, setCallbackGateway] = useState<'Midtrans' | 'Xendit' | 'Tripay' | 'Duitku'>('Midtrans');
   const [callbackChannel, setCallbackChannel] = useState<'QRIS' | 'Virtual Account (VA)' | 'E-Wallet'>('QRIS');
+  const [callbackRenewalStrategy, setCallbackRenewalStrategy] = useState<'expiry' | 'payment'>('payment');
 
   const filteredInvoices = invoices.filter(inv => {
     if (activeTab === 'unpaid') return inv.status === 'Belum Bayar';
@@ -100,7 +101,7 @@ export default function BillingGateway({
     const refNo = `REF-${callbackGateway.toUpperCase()}-${Math.floor(Math.random() * 899999) + 100000}`;
     const pMethod = `${callbackChannel} - ${callbackGateway}`;
     
-    onPayInvoice(inv.id, pMethod, refNo);
+    onPayInvoice(inv.id, pMethod, refNo, callbackRenewalStrategy);
 
     // Also trigger automated WhatsApp notification
     const cust = getCustomerObj(inv.customer_id);
@@ -312,6 +313,51 @@ export default function BillingGateway({
                   </select>
                 </div>
               </div>
+
+              {(() => {
+                const selectedCallbackInvoice = invoices.find(i => i.id === callbackInvoiceId);
+                const callbackCust = selectedCallbackInvoice ? getCustomerObj(selectedCallbackInvoice.customer_id) : null;
+                const isCallbackCustSuspended = callbackCust && callbackCust.status === 'Suspend';
+
+                if (isCallbackCustSuspended) {
+                  return (
+                    <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-850 space-y-2 text-xs">
+                      <span className="text-[10px] font-mono font-bold text-cyan-400 block uppercase tracking-wider">
+                        Aturan Perpanjangan Pelanggan Suspend (Isolir)
+                      </span>
+                      <div className="space-y-2 text-[11px] text-slate-300">
+                        <label className="flex items-start gap-2 cursor-pointer">
+                          <input 
+                            type="radio" 
+                            name="callbackRenewalStrategy"
+                            checked={callbackRenewalStrategy === 'expiry'} 
+                            onChange={() => setCallbackRenewalStrategy('expiry')}
+                            className="mt-0.5 text-cyan-500 focus:ring-0 focus:ring-offset-0 bg-slate-900 border-slate-800" 
+                          />
+                          <div>
+                            <strong className="block text-slate-200">UBAH TANGGAL AKTIF SESUAI TANGGAL BERAKHIR</strong>
+                            <span className="text-[10px] text-slate-500">Masa aktif baru mengikuti jatuh tempo invoice lama ({selectedCallbackInvoice?.due_date}).</span>
+                          </div>
+                        </label>
+                        <label className="flex items-start gap-2 cursor-pointer">
+                          <input 
+                            type="radio" 
+                            name="callbackRenewalStrategy"
+                            checked={callbackRenewalStrategy === 'payment'} 
+                            onChange={() => setCallbackRenewalStrategy('payment')}
+                            className="mt-0.5 text-cyan-500 focus:ring-0 focus:ring-offset-0 bg-slate-900 border-slate-800" 
+                          />
+                          <div>
+                            <strong className="block text-slate-200">UBAH TANGGAL AKTIF SESUAI TANGGAL BAYAR</strong>
+                            <span className="text-[10px] text-slate-500">Masa aktif baru di-reset mulai per hari ini ({new Date().toISOString().split('T')[0]}).</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-850 text-[11px] text-slate-400 leading-relaxed">
                 <strong>Sistem Otomasi:</strong> Callback ini akan mensimulasikan status lunas di backend, memanggil <code>MikrotikService-&gt;unsuspendUser()</code> untuk mengaktifkan koneksi PPPoE, dan menjadwalkan notifikasi WhatsApp kuitansi.
