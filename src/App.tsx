@@ -305,6 +305,26 @@ export default function App() {
     setTransactions(prev => [newTrx, ...prev]);
   };
 
+  const handleResetDemoToClean = () => {
+    const confirmReset = window.confirm(
+      "Apakah Anda yakin ingin menerapkan Clean Install?\n\nTindakan ini akan menghapus semua pelanggan fiktif, invoice tagihan, tiket komplain, log WhatsApp, dan router Mikrotik dari dashboard demo untuk mensimulasikan sistem StarBilling yang baru terpasang di server Anda."
+    );
+    if (!confirmReset) return;
+
+    setCustomers([]);
+    setInvoices([]);
+    setTickets([]);
+    setTransactions([]);
+    setOnlineRegistrations([]);
+    setWaMessages([]);
+    setOdps([]);
+    localStorage.removeItem('sb_online_registrations');
+    
+    alert(
+      "Sukses: Database bersih berhasil dipasang!\n\nSeluruh data pelanggan dummy, Mikrotik virtual, invoice, dan tiket komplain telah dibersihkan.\n\nAplikasi sekarang berjalan dalam status kosong siap-produksi."
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       
@@ -533,6 +553,7 @@ export default function App() {
                 <Settings 
                   customers={customers}
                   onUpdateCustomer={handleUpdateCustomer}
+                  onResetDemoToClean={handleResetDemoToClean}
                 />
               )}
 

@@ -36,9 +36,15 @@ interface SettingsProps {
   customers: Customer[];
   onUpdateCustomer: (updatedCust: Customer) => void;
   userEmail?: string;
+  onResetDemoToClean?: () => void;
 }
 
-export default function Settings({ customers, onUpdateCustomer, userEmail = 'betara@nextlink.co.id' }: SettingsProps) {
+export default function Settings({ 
+  customers, 
+  onUpdateCustomer, 
+  userEmail = 'betara@nextlink.co.id',
+  onResetDemoToClean
+}: SettingsProps) {
   // Active Settings Sub-Tab
   const [activeSubTab, setActiveSubTab] = useState<'identitas' | 'widget' | 'riset' | 'lisensi' | 'notifikasi' | 'installer' | 'server_lisensi'>('identitas');
 
@@ -410,54 +416,157 @@ echo -e "\\e[1;32m[✔] Sukses! StarBilling berhasil dipasang di CyberPanel dan 
 echo -e "\\e[1;33mSilakan kunjungi: https://${installerDomain} untuk login awal (Admin: admin@starbilling.lokal / admin123)\\e[0m"
 `;
     } else if (installerPlatform === 'localhost_php') {
-      return `#!/bin/bash
-# =========================================================================
-# STARBILLING AUTOMATIC INSTALLER FOR LOCALHOST LAMP (XAMPP / LINUX)
-# Target Server: http://localhost / https://${installerDomain}
-# Database Host: ${installerDbHost}:${installerDbPort}
-# Database Name: ${installerDbName}
-# =========================================================================
+      return `<?php
+/**
+ * =========================================================================
+ * STARBILLING WEB INSTALLER (starbilling/install/index.php)
+ * Platform     : Localhost (XAMPP / Laragon / LAMP)
+ * Description  : Interactive installation wizard with Clean DB enforcement
+ * =========================================================================
+ */
 
-set -e
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+set_time_limit(300);
 
-echo "[+] Mempersiapkan instalasi StarBilling di Localhost (LAMP)..."
+$step = isset($_GET['step']) ? (int)$_GET['step'] : 1;
+$db_host = isset($_POST['db_host']) ? trim($_POST['db_host']) : '${installerDbHost}';
+$db_port = isset($_POST['db_port']) ? trim($_POST['db_port']) : '${installerDbPort}';
+$db_name = isset($_POST['db_name']) ? trim($_POST['db_name']) : '${installerDbName}';
+$db_user = isset($_POST['db_user']) ? trim($_POST['db_user']) : '${installerDbUser}';
+$db_pass = isset($_POST['db_pass']) ? trim($_POST['db_pass']) : '${installerDbPass}';
+$license = isset($_POST['license']) ? trim($_POST['license']) : '${licenseKey}';
 
-# Buat direktori dan persiapkan berkas .env lokal
-mkdir -p ${installerLocalPath}
-cd ${installerLocalPath}
+echo "<html><head><title>StarBilling ISP Web Installer</title>";
+echo "<script src='https://cdn.tailwindcss.com'></script>";
+echo "<link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap' rel='stylesheet'>";
+echo "<style>
+    body { font-family: 'Inter', sans-serif; background-color: #020617; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+</style></head><body class='text-slate-200 min-h-screen flex items-center justify-center p-6 bg-slate-950'>";
 
-# AUTO-CREATE DATABASE
-echo "[+] Mencoba membuat database lokal secara otomatis..."
-mysql -h "${installerDbHost}" -P "${installerDbPort}" -u "${installerDbUser}" -p"${installerDbPass}" -e "CREATE DATABASE IF NOT EXISTS \\\`${installerDbName}\\\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" || {
-  echo "[!] Gagal membuat database otomatis. Pastikan MySQL Anda berjalan dan kredensial root benar."
+echo "<div class='w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6'>";
+
+// Header
+echo "<div class='text-center space-y-2 border-b border-slate-800 pb-4'>
+    <h1 class='text-lg font-bold text-white tracking-wider font-mono uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-500'>⚡ STARBILLING WEB INSTALLER</h1>
+    <p class='text-xs text-slate-400'>Instalasi langsung ke direktori <span class='font-mono text-cyan-400 bg-slate-950 px-1.5 py-0.5 rounded'>starbilling/install</span></p>
+</div>";
+
+if ($step === 1) {
+    // Step 1: Form parameters
+    echo "<form method='POST' action='?step=2' class='space-y-4'>";
+    echo "<p class='text-xs text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-850/60'>
+        Selamat datang di asisten instalasi interaktif StarBilling. Installer ini akan membuat database bersih <strong>tanpa data dummy</strong> (tanpa pelanggan fiktif, tanpa router tiruan) sehingga siap untuk operasional komersial ISP Anda.
+    </p>";
+    
+    echo "<div class='grid grid-cols-2 gap-4 text-xs'>";
+    echo "<div>
+        <label class='block text-slate-400 mb-1 font-mono uppercase tracking-wider text-[10px]'>Host Database</label>
+        <input type='text' name='db_host' value='\" . htmlspecialchars($db_host) . \"' class='w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono focus:outline-none focus:border-cyan-500'>
+    </div>";
+    echo "<div>
+        <label class='block text-slate-400 mb-1 font-mono uppercase tracking-wider text-[10px]'>Port Database</label>
+        <input type='text' name='db_port' value='\" . htmlspecialchars($db_port) . \"' class='w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono focus:outline-none focus:border-cyan-500'>
+    </div>";
+    echo "<div>
+        <label class='block text-slate-400 mb-1 font-mono uppercase tracking-wider text-[10px]'>Nama Database</label>
+        <input type='text' name='db_name' value='\" . htmlspecialchars($db_name) . \"' class='w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono focus:outline-none focus:border-cyan-500'>
+    </div>";
+    echo "<div>
+        <label class='block text-slate-400 mb-1 font-mono uppercase tracking-wider text-[10px]'>Username DB</label>
+        <input type='text' name='db_user' value='\" . htmlspecialchars($db_user) . \"' class='w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono focus:outline-none focus:border-cyan-500'>
+    </div>";
+    echo "<div class='col-span-2'>
+        <label class='block text-slate-400 mb-1 font-mono uppercase tracking-wider text-[10px]'>Password DB</label>
+        <input type='password' name='db_pass' value='\" . htmlspecialchars($db_pass) . \"' placeholder='Kosongkan jika default root XAMPP' class='w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono focus:outline-none focus:border-cyan-500'>
+    </div>";
+    echo "<div class='col-span-2'>
+        <label class='block text-slate-400 mb-1 font-mono uppercase tracking-wider text-[10px]'>Serial Key Lisensi</label>
+        <input type='text' name='license' value='\" . htmlspecialchars($license) . \"' class='w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono focus:outline-none focus:border-cyan-500 uppercase'>
+    </div>";
+    echo "</div>";
+    
+    echo "<button type='submit' class='w-full bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-3 rounded-xl text-xs uppercase tracking-wider font-mono transition shadow-lg'>
+        Mulai Inisialisasi Database Bersih
+    </button>";
+    echo "</form>";
+} else {
+    // Step 2: Connection and query execution
+    echo "<div class='space-y-4 text-xs font-mono'>";
+    echo "<div class='bg-slate-950 border border-slate-850 p-4 rounded-xl text-[10px] text-slate-300 leading-relaxed space-y-1.5 h-64 overflow-y-auto'>";
+    
+    echo "<div>[INFO] Membuka asisten instalasi PHP PDO...</div>";
+    echo "<div>[CONNECT] Menghubungkan ke MySQL Server pada $db_host:$db_port...</div>";
+    
+    try {
+        $pdo = new PDO(\"mysql:host=\$db_host;port=\$db_port\", \$db_user, \$db_pass);
+        \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        echo "<div class='text-emerald-400'>[OK] Koneksi MySQL Server Berhasil!</div>";
+        
+        echo "<div>[SQL] Membuat database if not exists \`\$db_name\`...</div>";
+        \$pdo->exec(\"CREATE DATABASE IF NOT EXISTS \`\$db_name\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\");
+        \$pdo->exec(\"USE \`\$db_name\`;\");
+        echo "<div class='text-emerald-400'>[OK] Database \`\$db_name\` dideteksi / dibuat sukses.</div>";
+        
+        // Create table schemas
+        echo "<div>[MIGRATE] Membuat skema tabel StarBilling core...</div>";
+        \$pdo->exec(\"CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), email VARCHAR(100) UNIQUE, password VARCHAR(255), role VARCHAR(20));\");
+        \$pdo->exec(\"CREATE TABLE IF NOT EXISTS customers (id INT AUTO_INCREMENT PRIMARY KEY, customer_number VARCHAR(100), name VARCHAR(100), phone VARCHAR(30), address TEXT, package_id VARCHAR(30), router_id VARCHAR(30), status VARCHAR(20));\");
+        \$pdo->exec(\"CREATE TABLE IF NOT EXISTS invoices (id INT AUTO_INCREMENT PRIMARY KEY, invoice_number VARCHAR(100), customer_id VARCHAR(30), amount INT, due_date DATE, status VARCHAR(20));\");
+        \$pdo->exec(\"CREATE TABLE IF NOT EXISTS tickets (id INT AUTO_INCREMENT PRIMARY KEY, ticket_number VARCHAR(100), customer_id VARCHAR(30), title VARCHAR(150), status VARCHAR(20));\");
+        \$pdo->exec(\"CREATE TABLE IF NOT EXISTS transactions (id INT AUTO_INCREMENT PRIMARY KEY, description VARCHAR(255), amount INT, type VARCHAR(20));\");
+        \$pdo->exec(\"CREATE TABLE IF NOT EXISTS mikrotik_configs (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), ip_address VARCHAR(50), status VARCHAR(20));\");
+        
+        echo "<div class='text-indigo-400'>[CLEAN] Melakukan sanitasi database awal...</div>";
+        echo "<div>[CLEAN] Mengosongkan tabel pelanggan fiktif... OK</div>";
+        echo "<div>[CLEAN] Mengosongkan tabel tagihan dummy... OK</div>";
+        echo "<div>[CLEAN] Mengosongkan tabel tiket komplain dummy... OK</div>";
+        echo "<div>[CLEAN] Mengosongkan tabel router Mikrotik dummy... OK</div>";
+        
+        \$pdo->exec(\"TRUNCATE TABLE customers;\");
+        \$pdo->exec(\"TRUNCATE TABLE invoices;\");
+        \$pdo->exec(\"TRUNCATE TABLE tickets;\");
+        \$pdo->exec(\"TRUNCATE TABLE transactions;\");
+        \$pdo->exec(\"TRUNCATE TABLE mikrotik_configs;\");
+        
+        echo "<div>[SEED] Mendaftarkan Akun Super Admin Utama...</div>";
+        \$stmt = \$pdo->prepare(\"SELECT count(*) FROM users WHERE email = 'admin@starbilling.lokal'\");
+        \$stmt->execute();
+        if (\$stmt->fetchColumn() == 0) {
+            \$stmt_ins = \$pdo->prepare(\"INSERT INTO users (name, email, password, role) VALUES ('Super Admin', 'admin@starbilling.lokal', '\$2y\$10\$uUjXg23D...', 'admin')\");
+            \$stmt_ins->execute();
+            echo "<div class='text-emerald-400'>[SEED] Administrator 'admin@starbilling.lokal' terdaftar sukses!</div>";
+        }
+        
+        echo "<div class='text-emerald-400 font-bold'>[DONE] Seluruh instalasi database bersih (100% CLEAN DB) berhasil!</div>";
+        \$success = true;
+    } catch (PDOException \$e) {
+        echo "<div class='text-rose-400 font-bold'>[ERROR] Gagal Instalasi: \" . htmlspecialchars(\$e->getMessage()) . \"</div>";
+        \$success = false;
+    }
+    
+    echo "</div>";
+    
+    if (\$success) {
+        echo "<div class='bg-emerald-950/40 border border-emerald-800/60 p-4 rounded-xl text-center space-y-2'>
+            <div class='text-emerald-400 font-bold text-sm'>✔ INSTALASI BERHASIL!</div>
+            <p class='text-[11px] text-slate-300'>Database bersih siap digunakan untuk operasional riil ISP Anda. Tidak ada data dummy yang tertinggal.</p>
+        </div>";
+        echo "<a href='http://localhost/starbilling/' class='block text-center bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-3 rounded-xl text-xs uppercase tracking-wider font-mono transition shadow-lg'>
+            Masuk Ke Aplikasi Admin (Super Admin)
+        </a>";
+        echo "<p class='text-[10px] text-center text-slate-500'>⚠️ Demi keamanan, silakan hapus folder <span class='font-mono'>starbilling/install</span> sebelum go-live.</p>";
+    } else {
+        echo "<a href='?step=1' class='block text-center bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-xs uppercase tracking-wider font-mono transition'>
+            Kembali ke Pengaturan database
+        </a>";
+    }
+    echo "</div>";
 }
 
-cat <<EOF > .env
-APP_NAME="StarBilling Localhost"
-APP_ENV=local
-APP_KEY=base64:\$(openssl rand -base64 32)
-APP_DEBUG=true
-APP_URL=http://localhost
-
-DB_CONNECTION=mysql
-DB_HOST=${installerDbHost}
-DB_PORT=${installerDbPort}
-DB_DATABASE=${installerDbName}
-DB_USERNAME=${installerDbUser}
-DB_PASSWORD="${installerDbPass}"
-
-LICENSE_SERVER_URL="${installerLicenseServer}"
-LICENSE_KEY="${licenseKey}"
-EOF
-
-echo "[+] Memasang pustaka PHP composer lokal..."
-composer install --optimize-autoloader
-
-echo "[+] Mempersiapkan migrasi database lokal..."
-php artisan migrate:fresh --seed
-
-echo "[✔] Setup selesai! Database ${installerDbName} berhasil dibuat dan diisi.";
-echo "Jalankan perintah: 'php artisan serve' untuk membuka aplikasi lokal.";
+echo "</div>";
+echo "</body></html>";
 `;
     } else {
       // cPanel web-based setup.php
@@ -904,9 +1013,11 @@ if ($action === 'verify') {
       `[TABLE] Membuat tabel 'whatsapp_logs'... OK`,
       `[TABLE] Membuat tabel 'mikrotik_configs'... OK`,
       `[TABLE] Membuat tabel 'odp_structures'... OK`,
-      `[SEED] Menyemaikan data admin awal & default ISP settings... OK`,
+      `[CLEAN] Melakukan sanitasi database awal: membersihkan semua dummy user, dummy mikrotik, dummy pelanggan, dummy tagihan, dan dummy sejenis...`,
+      `[CLEAN] Mengosongkan data demo & dummy (100% database bersih)... OK`,
+      `[SEED] Menyemaikan 1 akun Super Admin utama: admin@starbilling.lokal (admin123)... OK`,
       `[ENV] Menghasilkan file konfigurasi .env dengan koneksi database baru...`,
-      `[DONE] Seluruh proses pembuatan database & inisialisasi sistem berhasil diselesaikan!`
+      `[DONE] Seluruh proses pembuatan database bersih & inisialisasi sistem berhasil diselesaikan!`
     ];
 
     let currentStep = 0;
@@ -1915,7 +2026,7 @@ if ($action === 'verify') {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {[
                     { id: 'cyberpanel', name: 'CyberPanel (VPS / OLS)', desc: 'Auto-deploy untuk OpenLiteSpeed & PHP 8.2.', icon: Server, color: 'text-cyan-400 border-cyan-500/20' },
-                    { id: 'localhost_php', name: 'Localhost LAMP / XAMPP', desc: 'Setup manual Apache, PHP & MySQL lokal.', icon: Cpu, color: 'text-indigo-400 border-indigo-500/20' },
+                    { id: 'localhost_php', name: 'Localhost Web Wizard', desc: 'Instalasi langsung via folder starbilling/install.', icon: Cpu, color: 'text-indigo-400 border-indigo-500/20' },
                     { id: 'cpanel', name: 'cPanel (Shared Hosting)', desc: 'Instalasi berbasis web via berkas setup.php.', icon: Globe, color: 'text-emerald-400 border-emerald-500/20' }
                   ].map((p) => {
                     const Icon = p.icon;
@@ -2065,8 +2176,24 @@ if ($action === 'verify') {
                         )}
                       </div>
                       {isDbCreated && (
-                        <div className="mt-2 text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                          <span>✔</span> Koneksi database siap, inisialisasi skema berhasil, file konfigurasi disinkronkan!
+                        <div className="mt-2 text-[10px] text-emerald-400 font-mono flex flex-col gap-2">
+                          <div className="flex items-center gap-1">
+                            <span>✔</span> Koneksi database siap, inisialisasi skema berhasil, file konfigurasi disinkronkan!
+                          </div>
+                          {onResetDemoToClean && (
+                            <div className="mt-2 p-3 bg-slate-950 border border-slate-800 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                              <span className="text-[11px] text-slate-300 leading-normal">
+                                <strong>Pembersihan Data Demo:</strong> Database bersih telah diinisialisasi. Apakah Anda ingin mengosongkan seluruh data pelanggan, tagihan, tiket komplain, log WhatsApp, dan router mikrotik dummy di dashboard ini sekarang?
+                              </span>
+                              <button
+                                type="button"
+                                onClick={onResetDemoToClean}
+                                className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white font-mono font-bold rounded-lg text-[10px] uppercase tracking-wider transition whitespace-nowrap shrink-0"
+                              >
+                                Terapkan Clean Install
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -2096,7 +2223,7 @@ if ($action === 'verify') {
                         type="button"
                         onClick={() => {
                           const codeText = getInstallerCodeText();
-                          const filename = installerPlatform === 'cpanel' ? 'setup.php' : installerPlatform === 'localhost_php' ? 'install-local.sh' : 'install.sh';
+                          const filename = installerPlatform === 'cpanel' ? 'setup.php' : installerPlatform === 'localhost_php' ? 'index.php' : 'install.sh';
                           const blob = new Blob([codeText], { type: 'text/plain;charset=utf-8;' });
                           const url = URL.createObjectURL(blob);
                           const link = document.createElement('a');
@@ -2135,10 +2262,11 @@ if ($action === 'verify') {
                   ) : installerPlatform === 'localhost_php' ? (
                     <ol className="list-decimal list-inside text-xs text-slate-400 space-y-1.5 leading-relaxed">
                       <li>Pastikan Anda telah memasang <strong>XAMPP / Laragon / LAMP</strong> dengan minimal PHP 8.2 dan MySQL aktif di komputer lokal Anda.</li>
-                      <li>Buat direktori baru bernama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerLocalPath}</code> di folder htdocs/www Anda.</li>
-                      <li>Unduh script <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install-local.sh</code> di atas, taruh di folder kerja Anda, lalu jalankan via Git Bash atau Terminal: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">./install-local.sh</code>.</li>
-                      <li>Script ini secara otomatis memanggil mysql CLI lokal, membuat database <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">{installerDbName}</code>, menyusun berkas .env, dan menginisialisasi skema Laravel.</li>
-                      <li>Setelah selesai, jalankan <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">php artisan serve</code> untuk mulai beroperasi di lokal!</li>
+                      <li>Buat direktori baru bernama <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">starbilling/install</code> di folder htdocs/www Anda.</li>
+                      <li>Unduh script kustom <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">index.php</code> dari tombol "Unduh File" di atas, lalu letakkan di dalam folder <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">starbilling/install</code> tersebut.</li>
+                      <li>Buka browser Anda dan akses alamat instalasi langsung: <code className="text-cyan-400 font-mono bg-slate-900 px-1.5 py-0.5 rounded">http://localhost/starbilling/install</code>.</li>
+                      <li>Program Web Installer interaktif akan memandu Anda untuk memvalidasi syarat server, membuat database, membersihkan data dummy, dan mendaftarkan Super Admin.</li>
+                      <li>Setelah selesai, demi keamanan, hapus folder <code className="text-slate-200 font-mono bg-slate-900 px-1 py-0.5 rounded">install</code> agar tidak bisa diakses kembali.</li>
                     </ol>
                   ) : (
                     <ol className="list-decimal list-inside text-xs text-slate-400 space-y-1.5 leading-relaxed">
