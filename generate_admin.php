@@ -1,4 +1,6 @@
 <?php
+$content = <<<'HTML'
+<?php
 session_start();
 
 $menus = [
@@ -196,7 +198,7 @@ function renderForm($fields, $title = "Formulir") {
                         <input type="text" placeholder="Cari pelanggan..." class="bg-slate-900 border border-slate-800 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
                         <button class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm transition-colors"><i class="fas fa-search"></i></button>
                     </div>
-                    <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium transition-colors"><i class="fas fa-plus mr-2"></i> Tambah Pelanggan</button>
+                    <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium transition-colors"><i class="fas fa-plus mr-2"></i>Tambah Pelanggan</button>
                 </div>
                 <?= renderTable(
                     ['ID', 'Nama', 'Paket', 'IP Address', 'Status'],
@@ -208,21 +210,21 @@ function renderForm($fields, $title = "Formulir") {
                 ) ?>
 
             <?php elseif ($active_menu === 'Setting Wilayah'): ?>
-                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i> Tambah Wilayah</button></div>
+                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i>Tambah Wilayah</button></div>
                 <?= renderTable(['Kode Wilayah', 'Nama Wilayah', 'Keterangan'], [
                     ['WL-01', 'Kecamatan Utara', 'Area Coverage Utara'],
                     ['WL-02', 'Kecamatan Selatan', 'Area Coverage Selatan']
                 ]) ?>
 
             <?php elseif ($active_menu === 'Setting ODP'): ?>
-                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i> Tambah ODP</button></div>
+                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i>Tambah ODP</button></div>
                 <?= renderTable(['Nama ODP', 'Wilayah', 'Kapasitas', 'Terpakai'], [
                     ['ODP-UTR-01', 'Kecamatan Utara', '16 Port', '12 Port'],
                     ['ODP-SEL-05', 'Kecamatan Selatan', '8 Port', '8 Port <span class="text-rose-400 text-xs ml-2">(Penuh)</span>']
                 ]) ?>
 
             <?php elseif ($active_menu === 'Setting Paket'): ?>
-                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i> Tambah Paket</button></div>
+                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i>Tambah Paket</button></div>
                 <?= renderTable(['Nama Paket', 'Kecepatan', 'Harga (Rp)'], [
                     ['Home Basic', '20 Mbps', '150.000'],
                     ['Home Pro', '50 Mbps', '250.000'],
@@ -234,16 +236,9 @@ function renderForm($fields, $title = "Formulir") {
                     ['2026-07-05', 'Rudi Hermawan', 'Jl. Merdeka No 10', '<span class="text-yellow-400">Menunggu Survey</span>'],
                     ['2026-07-06', 'CV. Maju Terus', 'Ruko Sentra Bisnis', '<span class="text-blue-400">Proses Instalasi</span>']
                 ]) ?>
-                
-            <?php elseif ($active_menu === 'Kolektor'): ?>
-                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-user-plus mr-2"></i> Tambah Kolektor</button></div>
-                <?= renderTable(['Nama Kolektor', 'Wilayah', 'Total Tagihan Dikutip', 'Status'], [
-                    ['Agus Lapangan', 'Kecamatan Utara', 'Rp 4.500.000', '<span class="text-emerald-400">Aktif</span>'],
-                    ['Bagas Sentosa', 'Kecamatan Selatan', 'Rp 2.100.000', '<span class="text-emerald-400">Aktif</span>']
-                ]) ?>
 
             <?php elseif ($active_menu === 'Ticket Komplain'): ?>
-                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i> Buat Tiket</button></div>
+                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i>Buat Tiket</button></div>
                 <?= renderTable(['ID Tiket', 'Pelanggan', 'Keluhan', 'Status'], [
                     ['TK-9921', 'Budi Santoso', 'Internet Putus-putus', '<span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">Open</span>'],
                     ['TK-9922', 'Siti Aminah', 'Modem Merah (LOS)', '<span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">In Progress</span>']
@@ -252,96 +247,15 @@ function renderForm($fields, $title = "Formulir") {
             <?php elseif ($active_menu === 'Pesan Otomatis'): ?>
                 <?= renderForm([
                     ['label' => 'WhatsApp API Endpoint', 'type' => 'text', 'value' => 'http://localhost:8000/send-message'],
-                    ['label' => 'Template Tagihan Baru', 'type' => 'textarea', 'value' => 'Yth. *{nama}*, tagihan internet Anda sebesar *{jumlah}* sudah terbit. Harap bayar sebelum tanggal *{jatuh_tempo}*.'],
-                    ['label' => 'Template Peringatan Isolir', 'type' => 'textarea', 'value' => 'Yth. *{nama}*, internet Anda telah di-isolir karena melewati batas pembayaran.']
+                    ['label' => 'Template Tagihan Baru', 'type' => 'textarea'],
+                    ['label' => 'Template Peringatan Isolir', 'type' => 'textarea']
                 ], 'Setting WhatsApp Gateway') ?>
 
-            <?php elseif ($active_menu === 'Transaksi' || $active_menu === 'Pembayaran Tagihan' || $active_menu === 'Transaksi Lain-Lain'): ?>
-                <div class="mb-4"><button class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-check mr-2"></i> Proses Pembayaran</button></div>
+            <?php elseif ($active_menu === 'Transaksi' || $active_menu === 'Pembayaran Tagihan'): ?>
+                <div class="mb-4"><button class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-check mr-2"></i>Proses Pembayaran</button></div>
                 <?= renderTable(['Invoice', 'Pelanggan', 'Bulan', 'Total', 'Status'], [
                     ['INV-202607-001', 'Budi Santoso', 'Juli 2026', 'Rp 150.000', '<span class="text-emerald-400">Lunas</span>'],
                     ['INV-202607-002', 'Andi Network', 'Juli 2026', 'Rp 500.000', '<span class="text-rose-400">Belum Bayar</span>']
-                ]) ?>
-                
-            <?php elseif ($active_menu === 'Biaya & Diskon'): ?>
-                <?= renderForm([
-                    ['label' => 'Pajak PPN (%)', 'type' => 'number', 'value' => '11'],
-                    ['label' => 'Biaya Keterlambatan', 'type' => 'number', 'value' => '10000'],
-                    ['label' => 'Biaya Pemasangan Standar', 'type' => 'number', 'value' => '250000']
-                ], 'Konfigurasi Biaya Global') ?>
-                
-            <?php elseif ($active_menu === 'Laporan'): ?>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <h3 class="font-bold mb-4">Ringkasan Laporan Pemasukan</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between p-3 bg-slate-950 rounded-lg"><span>Total Tagihan:</span> <span class="font-mono text-emerald-400">Rp 45.200.000</span></div>
-                            <div class="flex justify-between p-3 bg-slate-950 rounded-lg"><span>Lunas:</span> <span class="font-mono text-emerald-400">Rp 35.000.000</span></div>
-                            <div class="flex justify-between p-3 bg-slate-950 rounded-lg border border-rose-900/50"><span>Tunggakan:</span> <span class="font-mono text-rose-400">Rp 10.200.000</span></div>
-                        </div>
-                        <button class="w-full mt-4 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm"><i class="fas fa-file-excel mr-2"></i> Export Laporan Pemasukan</button>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <h3 class="font-bold mb-4">Laporan Pelanggan</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between p-3 bg-slate-950 rounded-lg"><span>Total Aktif:</span> <span class="font-mono text-blue-400">1,248</span></div>
-                            <div class="flex justify-between p-3 bg-slate-950 rounded-lg"><span>Terisolir:</span> <span class="font-mono text-rose-400">42</span></div>
-                            <div class="flex justify-between p-3 bg-slate-950 rounded-lg"><span>Berhenti / Terminate:</span> <span class="font-mono text-slate-400">18</span></div>
-                        </div>
-                        <button class="w-full mt-4 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm"><i class="fas fa-file-excel mr-2"></i> Export Laporan Pelanggan</button>
-                    </div>
-                </div>
-                
-            <?php elseif ($active_menu === 'Identitas & Lisensi' || $active_menu === 'Sistem Setting'): ?>
-                <?= renderForm([
-                    ['label' => 'Nama Perusahaan (ISP)', 'type' => 'text', 'value' => 'PT. StarBilling Network'],
-                    ['label' => 'Alamat', 'type' => 'textarea', 'value' => 'Jl. Teknologi No. 42, Cyber City'],
-                    ['label' => 'Telepon', 'type' => 'text', 'value' => '081234567890'],
-                    ['label' => 'Email Bantuan', 'type' => 'email', 'value' => 'support@starbilling.net'],
-                    ['label' => 'Kunci Lisensi (License Key)', 'type' => 'text', 'value' => 'SB-LIFETIME-DEMO-2026']
-                ], 'Identitas Perusahaan') ?>
-                
-            <?php elseif ($active_menu === 'Master Bank'): ?>
-                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i> Tambah Rekening Bank</button></div>
-                <?= renderTable(['Bank', 'Nama Rekening', 'Nomor Rekening'], [
-                    ['BCA', 'PT. StarBilling Network', '0123456789'],
-                    ['Mandiri', 'PT. StarBilling Network', '1370000123456']
-                ]) ?>
-                
-            <?php elseif ($active_menu === 'Payment Gateway'): ?>
-                <?= renderForm([
-                    ['label' => 'Tripay Merchant Code', 'type' => 'text', 'value' => 'T12345'],
-                    ['label' => 'Tripay API Key', 'type' => 'password', 'value' => 'DEV-****************'],
-                    ['label' => 'Tripay Private Key', 'type' => 'password', 'value' => '****************']
-                ], 'Tripay Configuration') ?>
-                
-            <?php elseif ($active_menu === 'AddOn'): ?>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <i class="fas fa-qrcode text-3xl text-emerald-400"></i>
-                            <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded-full">Installed</span>
-                        </div>
-                        <h3 class="font-bold mb-2">QRIS Generator</h3>
-                        <p class="text-sm text-slate-400 mb-4">Generate QRIS dinamis untuk pembayaran tagihan otomatis tanpa PG.</p>
-                        <button class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-sm transition-colors">Pengaturan</button>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <i class="fas fa-print text-3xl text-blue-400"></i>
-                            <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">Installed</span>
-                        </div>
-                        <h3 class="font-bold mb-2">Thermal Printer</h3>
-                        <p class="text-sm text-slate-400 mb-4">Cetak struk tagihan langsung ke printer thermal bluetooth/USB.</p>
-                        <button class="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-sm transition-colors">Pengaturan</button>
-                    </div>
-                </div>
-                
-            <?php elseif ($active_menu === 'Karyawan'): ?>
-                <div class="mb-4"><button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium"><i class="fas fa-user-plus mr-2"></i> Tambah Karyawan</button></div>
-                <?= renderTable(['Nama Karyawan', 'Email', 'Role (Jabatan)', 'Status'], [
-                    ['Super Admin', 'admin@starbilling.lokal', '<span class="font-bold text-blue-400">Administrator</span>', '<span class="text-emerald-400">Aktif</span>'],
-                    ['Teknisi 1', 'teknisi@starbilling.lokal', 'Teknisi / Lapangan', '<span class="text-emerald-400">Aktif</span>']
                 ]) ?>
 
             <?php elseif ($active_menu === 'Update & GitHub Sync'): ?>
@@ -377,3 +291,6 @@ function renderForm($fields, $title = "Formulir") {
 
 </body>
 </html>
+HTML;
+file_put_contents('admin/index.php', $content);
+?>
