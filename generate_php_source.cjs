@@ -29,9 +29,9 @@ session_start();
 `,
   'config.sample.php': `<?php
 $db_host = 'localhost';
-$db_user = 'root';
-$db_pass = '';
-$db_name = 'starbilling';
+$db_user = 'app_admin';
+$db_pass = 'v%HB3JOrP^1jD*sE';
+$db_name = 'app_starbill';
 `,
   'README.md': `# StarBilling ISP Suite\nProfessional ISP Billing System.\n`,
   'version.json': `{\n  "version": "1.0.0"\n}`,
