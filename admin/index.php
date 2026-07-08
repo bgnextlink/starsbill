@@ -3,9 +3,12 @@ session_start();
 
 $menus = [
     'Dashboard',
-    'Setting Server',
+    'Setting Server' => [
+        'Router Mikrotik',
+        'GenieACS',
+        'Import Data'
+    ],
     'Members & Billing' => [
-        'Kelola Data Pelanggan',
         'Setting Wilayah',
         'Setting ODP',
         'Setting Paket',
@@ -13,24 +16,52 @@ $menus = [
         'Pendaftaran Online',
         'Kolektor',
         'Ticket Komplain',
-        'Pesan Otomatis',
-        'Transaksi'
+        'Pesan Otomatis'
     ],
-    'Pembayaran & Transaksi Lainya' => [
+    'Transaksi' => [
         'Transaksi Lain-Lain',
         'Pembayaran Tagihan',
         'Biaya & Diskon'
     ],
-    'Laporan',
-    'Setting' => [
-        'Identitas & Lisensi',
-        'Master Bank',
-        'Payment Gateway',
-        'AddOn',
-        'Karyawan',
-        'Sistem Setting'
+    'Laporan' => [
+        'Mutasi Keuangan',
+        'Reward Marketing',
+        'Log Isolir',
+        'Ganti Paket',
+        'Penjualan Voucher',
+        'Pembayaran Online',
+        'Invoice Unpaid',
+        'Log Open Isolir',
+        'Laporan Omset',
+        'Laporan Laba Rugi'
     ],
-    'Update & GitHub Sync'
+    'Master Bank',
+    'Payment Gateway' => [
+        'Xendit',
+        'Tripay',
+        'Duitku',
+        'Flip',
+        'Doku'
+    ],
+    'AddOn' => [
+        'VPN Client',
+        'Halaman Isolir',
+        'Wa Gateway',
+        'Pengaturan Portal Pelanggan'
+    ],
+    'Karyawan' => [
+        'Jabatan & Hak Akses',
+        'Data Karyawan',
+        'Histori Login',
+        'Log Pelanggan'
+    ],
+    'Sistem Setting' => [
+        'Identitas',
+        'Widget',
+        'Riset Ulang Isolir',
+        'Lisensi',
+        'Update'
+    ]
 ];
 
 $active_menu = isset($_GET['menu']) ? $_GET['menu'] : 'Dashboard';
@@ -129,26 +160,73 @@ function renderForm($fields, $title) {
         <!-- Content Area -->
         <div class="p-6">
             <?php if ($active_menu === 'Dashboard'): ?>
-                <!-- Same dashboard content -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <div class="text-slate-400 text-sm mb-1">Total Pelanggan</div>
-                        <div class="text-2xl font-bold text-blue-400">1,248</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center">
+                        <div class="text-slate-400 text-sm mb-2">PPP Screets</div>
+                        <div class="text-4xl font-bold text-white">0</div>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <div class="text-slate-400 text-sm mb-1">Pendapatan Bulan Ini</div>
-                        <div class="text-2xl font-bold text-emerald-400">Rp 45.2M</div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center">
+                        <div class="text-slate-400 text-sm mb-2">PPP Online</div>
+                        <div class="text-4xl font-bold text-emerald-400">0</div>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <div class="text-slate-400 text-sm mb-1">Tiket Aktif</div>
-                        <div class="text-2xl font-bold text-rose-400">12</div>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                        <div class="text-slate-400 text-sm mb-1">Router Aktif</div>
-                        <div class="text-2xl font-bold text-indigo-400">8</div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center">
+                        <div class="text-slate-400 text-sm mb-2">PPP Offline</div>
+                        <div class="text-4xl font-bold text-rose-400">0</div>
                     </div>
                 </div>
-            <?php elseif ($active_menu === 'Setting Server'): ?>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                        <h3 class="font-bold text-white mb-4">Pendapatan vs Pengeluaran</h3>
+                        <div class="h-48 flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
+                            [Grafik Pendapatan vs Pengeluaran]
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="font-bold text-white">Metode Pembayaran</h3>
+                            <div class="text-right">
+                                <div class="text-xs text-slate-400">Periode</div>
+                                <div class="text-sm font-medium text-blue-400">01-07-2026 s/d 09-07-2026</div>
+                                <div class="text-xs text-slate-400 mt-1">25 Transaksi</div>
+                            </div>
+                        </div>
+                        <div class="h-36 flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
+                            [Grafik Metode Pembayaran]
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden mb-6">
+                    <div class="p-6 border-b border-slate-800">
+                        <h3 class="font-bold text-white text-lg">Status Pelanggan</h3>
+                        <p class="text-slate-400 text-sm mt-1">Daftar Pelanggan Layanan Belum Terpasang atau belum aktif</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
+                                <tr>
+                                    <th class="px-6 py-4">No</th>
+                                    <th class="px-6 py-4">Nama</th>
+                                    <th class="px-6 py-4">Telp / Wa</th>
+                                    <th class="px-6 py-4">Alamat</th>
+                                    <th class="px-6 py-4">Area</th>
+                                    <th class="px-6 py-4">Paket</th>
+                                    <th class="px-6 py-4">Tarif</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/50 text-slate-300">
+                                <tr class="hover:bg-slate-800/20">
+                                    <td colspan="8" class="px-6 py-8 text-center text-slate-500">
+                                        Tidak ada data pelanggan yang belum terpasang/aktif
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php elseif ($active_menu === 'Router Mikrotik' || $active_menu === 'Setting Server'): ?>
                 <?= renderForm([
                     ['label' => 'Nama Server', 'type' => 'text', 'value' => 'Mikrotik Utama'],
                     ['label' => 'IP Address / Host', 'type' => 'text', 'value' => '192.168.1.1'],
@@ -156,7 +234,23 @@ function renderForm($fields, $title) {
                     ['label' => 'API Username', 'type' => 'text', 'value' => 'api_admin'],
                     ['label' => 'API Password', 'type' => 'password', 'value' => '*********']
                 ], 'Koneksi RouterOS') ?>
-            <?php elseif ($active_menu === 'Update & GitHub Sync'): ?>
+            <?php elseif ($active_menu === 'GenieACS'): ?>
+                <?= renderForm([
+                    ['label' => 'URL GenieACS NBI', 'type' => 'text', 'value' => 'http://10.10.10.10:7557'],
+                    ['label' => 'GenieACS Username (Opsional)', 'type' => 'text', 'value' => ''],
+                    ['label' => 'GenieACS Password (Opsional)', 'type' => 'password', 'value' => '']
+                ], 'Konfigurasi GenieACS') ?>
+            <?php elseif ($active_menu === 'Import Data'): ?>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl">
+                    <h3 class="font-bold mb-6 text-lg text-white">Import Data Pelanggan / Sistem</h3>
+                    <div class="p-6 border border-dashed border-slate-700 rounded-lg bg-slate-950 text-center mb-6">
+                        <i class="fas fa-file-excel text-3xl text-slate-500 mb-4"></i>
+                        <p class="text-sm text-slate-400 mb-4">Upload file Excel (.xlsx, .csv) untuk mengimpor data pelanggan secara massal.</p>
+                        <button class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">Pilih File Data</button>
+                    </div>
+                    <button class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg transition-colors">Mulai Import Data</button>
+                </div>
+            <?php elseif ($active_menu === 'Update'): ?>
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 max-w-2xl mx-auto mt-10">
                     <div class="text-center mb-6">
                         <i class="fab fa-github text-4xl text-slate-400 mb-4"></i>

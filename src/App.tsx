@@ -1,19 +1,24 @@
 import { useState } from 'react';
 import {
-  LayoutDashboard, Server, Users, Users2, MapPin, Router, Package, UserCheck, UserPlus,
+  LayoutDashboard, Server, Users, MapPin, Router, Package, UserCheck, UserPlus,
   WalletCards, Ticket, MessageSquare, ArrowRightLeft, CreditCard, Receipt, HandCoins,
-  FileText, Settings, Shield, Building2, TerminalSquare, Puzzle, UsersRound, Settings2,
+  FileText, Building2, TerminalSquare, Puzzle, UsersRound, Settings2,
   LogOut, ChevronDown, ChevronRight, Menu, X, Download, Github, RefreshCw,
-  CheckCircle2, AlertCircle
+   
 } from 'lucide-react';
 
 export default function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+    'server': false,
     'members': true,
     'transactions': false,
-    'settings': false
+    'laporan': false,
+    'payment-gateway': false,
+    'addon': false,
+    'karyawan': false,
+    'sistem-setting': false
   });
 
   const toggleSubmenu = (menu: string) => {
@@ -25,13 +30,21 @@ export default function App() {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'server', label: 'Setting Server', icon: Server },
+    {
+      id: 'server',
+      label: 'Setting Server',
+      icon: Server,
+      subItems: [
+        { id: 'router-mikrotik', label: 'Router Mikrotik', icon: Router },
+        { id: 'genieacs', label: 'GenieACS', icon: Server },
+        { id: 'import-data', label: 'Import Data', icon: ArrowRightLeft },
+      ]
+    },
     {
       id: 'members',
       label: 'Members & Billing',
       icon: Users,
       subItems: [
-        { id: 'kelola-pelanggan', label: 'Kelola Data Pelanggan', icon: Users2 },
         { id: 'wilayah', label: 'Setting Wilayah', icon: MapPin },
         { id: 'odp', label: 'Setting ODP', icon: Router },
         { id: 'paket', label: 'Setting Paket', icon: Package },
@@ -40,12 +53,11 @@ export default function App() {
         { id: 'kolektor', label: 'Kolektor', icon: WalletCards },
         { id: 'komplain', label: 'Ticket Komplain', icon: Ticket },
         { id: 'pesan', label: 'Pesan Otomatis', icon: MessageSquare },
-        { id: 'transaksi', label: 'Transaksi', icon: ArrowRightLeft },
       ]
     },
     {
       id: 'transactions',
-      label: 'Pembayaran & Transaksi Lainya',
+      label: 'Transaksi',
       icon: CreditCard,
       subItems: [
         { id: 'transaksi-lain', label: 'Transaksi Lain-Lain', icon: ArrowRightLeft },
@@ -53,19 +65,68 @@ export default function App() {
         { id: 'biaya-diskon', label: 'Biaya & Diskon', icon: HandCoins },
       ]
     },
-    { id: 'laporan', label: 'Laporan', icon: FileText },
     {
-      id: 'settings',
-      label: 'Setting',
-      icon: Settings,
+      id: 'laporan',
+      label: 'Laporan',
+      icon: FileText,
       subItems: [
-        { id: 'identitas', label: 'Identitas & Lisensi', icon: Shield },
-        { id: 'bank', label: 'Master Bank', icon: Building2 },
-        { id: 'payment', label: 'Payment Gateway', icon: TerminalSquare },
-        { id: 'addon', label: 'AddOn', icon: Puzzle },
-        { id: 'karyawan', label: 'Karyawan', icon: UsersRound },
-        { id: 'sistem', label: 'Sistem Setting', icon: Settings2 },
-        { id: 'github-sync', label: 'Update & GitHub Sync', icon: Github },
+        { id: 'mutasi-keuangan', label: 'Mutasi Keuangan', icon: FileText },
+        { id: 'reward-marketing', label: 'Reward Marketing', icon: FileText },
+        { id: 'log-isolir', label: 'Log Isolir', icon: FileText },
+        { id: 'ganti-paket', label: 'Ganti Paket', icon: FileText },
+        { id: 'penjualan-voucher', label: 'Penjualan Voucher', icon: FileText },
+        { id: 'pembayaran-online', label: 'Pembayaran Online', icon: FileText },
+        { id: 'invoice-unpaid', label: 'Invoice Unpaid', icon: FileText },
+        { id: 'log-open-isolir', label: 'Log Open Isolir', icon: FileText },
+        { id: 'laporan-omset', label: 'Laporan Omset', icon: FileText },
+        { id: 'laporan-laba-rugi', label: 'Laporan Laba Rugi', icon: FileText },
+      ]
+    },
+    { id: 'master-bank', label: 'Master Bank', icon: Building2 },
+    {
+      id: 'payment-gateway',
+      label: 'Payment Gateway',
+      icon: TerminalSquare,
+      subItems: [
+        { id: 'pg-xendit', label: 'Xendit', icon: TerminalSquare },
+        { id: 'pg-tripay', label: 'Tripay', icon: TerminalSquare },
+        { id: 'pg-duitku', label: 'Duitku', icon: TerminalSquare },
+        { id: 'pg-flip', label: 'Flip', icon: TerminalSquare },
+        { id: 'pg-doku', label: 'Doku', icon: TerminalSquare },
+      ]
+    },
+    {
+      id: 'addon',
+      label: 'AddOn',
+      icon: Puzzle,
+      subItems: [
+        { id: 'addon-vpn', label: 'VPN Client', icon: Puzzle },
+        { id: 'addon-isolir', label: 'Halaman Isolir', icon: Puzzle },
+        { id: 'addon-wa', label: 'Wa Gateway', icon: Puzzle },
+        { id: 'addon-portal', label: 'Pengaturan Portal Pelanggan', icon: Puzzle },
+      ]
+    },
+    {
+      id: 'karyawan',
+      label: 'Karyawan',
+      icon: UsersRound,
+      subItems: [
+        { id: 'karyawan-jabatan', label: 'Jabatan & Hak Akses', icon: UsersRound },
+        { id: 'karyawan-data', label: 'Data Karyawan', icon: UsersRound },
+        { id: 'karyawan-histori', label: 'Histori Login', icon: UsersRound },
+        { id: 'karyawan-log', label: 'Log Pelanggan', icon: UsersRound },
+      ]
+    },
+    {
+      id: 'sistem-setting',
+      label: 'Sistem Setting',
+      icon: Settings2,
+      subItems: [
+        { id: 'sistem-identitas', label: 'Identitas', icon: Settings2 },
+        { id: 'sistem-widget', label: 'Widget', icon: Settings2 },
+        { id: 'sistem-riset', label: 'Riset Ulang Isolir', icon: Settings2 },
+        { id: 'sistem-lisensi', label: 'Lisensi', icon: Settings2 },
+        { id: 'github-sync', label: 'Update', icon: Github },
       ]
     }
   ];
@@ -75,59 +136,159 @@ export default function App() {
       case 'dashboard':
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex items-center gap-4">
-                <div className="p-4 rounded-lg bg-blue-500/10 text-blue-400"><Users size={32} /></div>
-                <div><div className="text-sm text-slate-400">Total Pelanggan</div><div className="text-2xl font-bold text-white">1,248</div></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex flex-col items-center justify-center">
+                <div className="text-sm text-slate-400 mb-2">PPP Screets</div>
+                <div className="text-4xl font-bold text-white">0</div>
               </div>
-              <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex items-center gap-4">
-                <div className="p-4 rounded-lg bg-emerald-500/10 text-emerald-400"><CreditCard size={32} /></div>
-                <div><div className="text-sm text-slate-400">Pendapatan Bulan Ini</div><div className="text-2xl font-bold text-white">Rp 45.2M</div></div>
+              <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex flex-col items-center justify-center">
+                <div className="text-sm text-slate-400 mb-2">PPP Online</div>
+                <div className="text-4xl font-bold text-emerald-400">0</div>
               </div>
-              <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex items-center gap-4">
-                <div className="p-4 rounded-lg bg-rose-500/10 text-rose-400"><Ticket size={32} /></div>
-                <div><div className="text-sm text-slate-400">Tiket Aktif</div><div className="text-2xl font-bold text-white">12</div></div>
-              </div>
-              <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex items-center gap-4">
-                <div className="p-4 rounded-lg bg-indigo-500/10 text-indigo-400"><Router size={32} /></div>
-                <div><div className="text-sm text-slate-400">Router Aktif</div><div className="text-2xl font-bold text-white">8</div></div>
+              <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex flex-col items-center justify-center">
+                <div className="text-sm text-slate-400 mb-2">PPP Offline</div>
+                <div className="text-4xl font-bold text-rose-400">0</div>
               </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                <h3 className="font-bold text-white mb-4">Aktivitas Terakhir</h3>
-                <ul className="space-y-4">
-                  <li className="flex gap-3 text-sm"><div className="text-emerald-400 mt-0.5"><CheckCircle2 size={16} /></div><div><span className="text-white font-medium">Pembayaran Sukses</span> - Budi Santoso (INV-10023)<br/><span className="text-slate-500 text-xs">5 menit yang lalu</span></div></li>
-                  <li className="flex gap-3 text-sm"><div className="text-rose-400 mt-0.5"><AlertCircle size={16} /></div><div><span className="text-white font-medium">Isolir Otomatis</span> - Andi Network<br/><span className="text-slate-500 text-xs">15 menit yang lalu</span></div></li>
-                  <li className="flex gap-3 text-sm"><div className="text-blue-400 mt-0.5"><UserPlus size={16} /></div><div><span className="text-white font-medium">Pelanggan Baru</span> - PT. Makmur Jaya<br/><span className="text-slate-500 text-xs">1 jam yang lalu</span></div></li>
-                </ul>
+                <h3 className="font-bold text-white mb-4">Pendapatan vs Pengeluaran</h3>
+                <div className="h-48 flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
+                  [Grafik Pendapatan vs Pengeluaran]
+                </div>
               </div>
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                <h3 className="font-bold text-white mb-4">Statistik Tagihan</h3>
-                <div className="space-y-4">
-                  <div><div className="flex justify-between text-sm mb-1"><span className="text-slate-300">Lunas</span><span className="text-emerald-400">75%</span></div><div className="w-full bg-slate-800 rounded-full h-2"><div className="bg-emerald-400 h-2 rounded-full" style={{width: '75%'}}></div></div></div>
-                  <div><div className="flex justify-between text-sm mb-1"><span className="text-slate-300">Belum Bayar</span><span className="text-yellow-400">20%</span></div><div className="w-full bg-slate-800 rounded-full h-2"><div className="bg-yellow-400 h-2 rounded-full" style={{width: '20%'}}></div></div></div>
-                  <div><div className="flex justify-between text-sm mb-1"><span className="text-slate-300">Jatuh Tempo</span><span className="text-rose-400">5%</span></div><div className="w-full bg-slate-800 rounded-full h-2"><div className="bg-rose-400 h-2 rounded-full" style={{width: '5%'}}></div></div></div>
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="font-bold text-white">Metode Pembayaran</h3>
+                  <div className="text-right">
+                    <div className="text-xs text-slate-400">Periode</div>
+                    <div className="text-sm font-medium text-blue-400">01-07-2026 s/d 09-07-2026</div>
+                    <div className="text-xs text-slate-400 mt-1">25 Transaksi</div>
+                  </div>
+                </div>
+                <div className="h-36 flex items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-lg">
+                  [Grafik Metode Pembayaran]
                 </div>
               </div>
             </div>
+
+            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden mb-6">
+              <div className="p-6 border-b border-slate-800">
+                <h3 className="font-bold text-white text-lg">Status Pelanggan</h3>
+                <p className="text-slate-400 text-sm mt-1">Daftar Pelanggan Layanan Belum Terpasang atau belum aktif</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
+                    <tr>
+                      <th className="px-6 py-4">No</th>
+                      <th className="px-6 py-4">Nama</th>
+                      <th className="px-6 py-4">Telp / Wa</th>
+                      <th className="px-6 py-4">Alamat</th>
+                      <th className="px-6 py-4">Area</th>
+                      <th className="px-6 py-4">Paket</th>
+                      <th className="px-6 py-4">Tarif</th>
+                      <th className="px-6 py-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/50 text-slate-300">
+                    <tr className="hover:bg-slate-800/20">
+                      <td colSpan={8} className="px-6 py-8 text-center text-slate-500">
+                        Tidak ada data pelanggan yang belum terpasang/aktif
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         );
+
+
         
-      case 'server':
+      case 'router-mikrotik':
         return (
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-3xl">
             <h3 className="text-lg font-bold text-white mb-6">Konfigurasi API Router Mikrotik Utama</h3>
-            <form className="space-y-4">
-              <div><label className="block text-sm font-medium text-slate-400 mb-1">Nama Server</label><input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="Mikrotik Utama"/></div>
-              <div><label className="block text-sm font-medium text-slate-400 mb-1">IP Address / Host</label><input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="192.168.1.1"/></div>
-              <div><label className="block text-sm font-medium text-slate-400 mb-1">API Port</label><input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="8728"/></div>
-              <div><label className="block text-sm font-medium text-slate-400 mb-1">API Username</label><input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="api_admin"/></div>
-              <div><label className="block text-sm font-medium text-slate-400 mb-1">API Password</label><input type="password" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="*********"/></div>
-              <div className="pt-4"><button type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
-            </form>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Nama Server</label>
+                <input type="text" defaultValue="Mikrotik Utama" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">IP Address / Host</label>
+                <input type="text" defaultValue="192.168.1.1" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">API Port</label>
+                  <input type="number" defaultValue="8728" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">API Username</label>
+                  <input type="text" defaultValue="api_admin" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">API Password</label>
+                <input type="password" defaultValue="*********" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+              </div>
+              <div className="pt-4">
+                <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                  Simpan Konfigurasi
+                </button>
+              </div>
+            </div>
           </div>
         );
+      case 'genieacs':
+        return (
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-3xl">
+            <h3 className="text-lg font-bold text-white mb-6">Konfigurasi GenieACS</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">URL GenieACS NBI</label>
+                <input type="text" placeholder="http://10.10.10.10:7557" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">GenieACS Username (Opsional)</label>
+                <input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">GenieACS Password (Opsional)</label>
+                <input type="password" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+              </div>
+              <div className="pt-4">
+                <button className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                  Test Connection & Save
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      case 'import-data':
+        return (
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-3xl">
+            <h3 className="text-lg font-bold text-white mb-6">Import Data Pelanggan / Sistem</h3>
+            <div className="space-y-6">
+              <div className="p-4 border border-dashed border-slate-700 rounded-lg bg-slate-950 text-center">
+                <ArrowRightLeft className="mx-auto text-slate-500 mb-2" size={32} />
+                <p className="text-sm text-slate-400 mb-4">Upload file Excel (.xlsx, .csv) untuk mengimpor data pelanggan secara massal.</p>
+                <input type="file" className="hidden" id="file-upload" />
+                <label htmlFor="file-upload" className="bg-slate-800 hover:bg-slate-700 cursor-pointer text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                  Pilih File Data
+                </label>
+              </div>
+              <div>
+                <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg transition-colors">
+                  Mulai Import Data
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
 
       case 'kelola-pelanggan':
       case 'data-pelanggan':
