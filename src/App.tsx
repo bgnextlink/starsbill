@@ -215,7 +215,7 @@ export default function App() {
                 <h3 className="font-bold text-white text-lg">Router Mikrotik</h3>
                 <p className="text-slate-400 text-sm mt-1">Daftar koneksi Router Mikrotik yang terhubung dengan sistem</p>
               </div>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
                 <Plus size={18} /> Tambah Router
               </button>
             </div>
@@ -247,8 +247,8 @@ export default function App() {
                     <td className="px-6 py-4">API</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-blue-400 hover:bg-blue-400/10 rounded transition-colors" title="Edit"><Edit size={16} /></button>
-                        <button className="p-2 text-rose-400 hover:bg-rose-400/10 rounded transition-colors" title="Hapus"><Trash2 size={16} /></button>
+                        <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="p-2 text-blue-400 hover:bg-blue-400/10 rounded transition-colors" title="Edit"><Edit size={16} /></button>
+                        <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="p-2 text-rose-400 hover:bg-rose-400/10 rounded transition-colors" title="Hapus"><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -266,7 +266,7 @@ export default function App() {
                 <h3 className="font-bold text-white text-lg">Devices List</h3>
                 <p className="text-slate-400 text-sm mt-1">Daftar perangkat GenieACS yang terhubung</p>
               </div>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
                 <Settings2 size={16} /> Konfigurasi
               </button>
             </div>
@@ -334,7 +334,7 @@ export default function App() {
                 </label>
               </div>
               <div>
-                <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg transition-colors">
+                <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg transition-colors">
                   Mulai Import Data
                 </button>
               </div>
@@ -349,7 +349,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Data Pelanggan</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Pelanggan</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Pelanggan</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -371,7 +371,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Setting Wilayah</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Wilayah</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Wilayah</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -392,7 +392,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Setting ODP</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah ODP</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah ODP</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -413,7 +413,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Setting Paket</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Paket</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Paket</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -455,7 +455,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Kolektor Lapangan</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Kolektor</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Kolektor</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -476,7 +476,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Ticket Komplain</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Buat Tiket</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Buat Tiket</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -500,7 +500,7 @@ export default function App() {
               <div><label className="block text-sm font-medium text-slate-400 mb-1">WhatsApp API Endpoint</label><input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="http://localhost:8000/send-message"/></div>
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Template Tagihan Baru</label><textarea rows={4} className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="Yth. *{nama}*, tagihan internet Anda sebesar *{jumlah}* sudah terbit. Harap bayar sebelum tanggal *{jatuh_tempo}*."/></div>
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Template Peringatan Isolir</label><textarea rows={4} className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="Yth. *{nama}*, internet Anda telah di-isolir karena melewati batas pembayaran."/></div>
-              <div className="pt-4"><button type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
+              <div className="pt-4"><button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
             </form>
           </div>
         );
@@ -512,7 +512,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Pembayaran & Transaksi</h3>
-              <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Proses Pembayaran</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Proses Pembayaran</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -536,7 +536,7 @@ export default function App() {
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Pajak PPN (%)</label><input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="11"/></div>
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Biaya Keterlambatan</label><input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="10000"/></div>
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Biaya Pemasangan Standar</label><input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="250000"/></div>
-              <div className="pt-4"><button type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
+              <div className="pt-4"><button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
             </form>
           </div>
         );
@@ -551,7 +551,7 @@ export default function App() {
                 <div className="flex justify-between p-3 bg-slate-950 rounded-lg text-sm text-slate-300"><span>Lunas:</span> <span className="font-mono text-emerald-400">Rp 35.000.000</span></div>
                 <div className="flex justify-between p-3 bg-slate-950 rounded-lg text-sm text-slate-300 border border-rose-900/50"><span>Tunggakan:</span> <span className="font-mono text-rose-400">Rp 10.200.000</span></div>
               </div>
-              <button className="w-full mt-4 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm text-white font-medium">Export Laporan Pemasukan (Excel)</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="w-full mt-4 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm text-white font-medium">Export Laporan Pemasukan (Excel)</button>
             </div>
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
               <h3 className="font-bold text-white mb-4">Laporan Pelanggan</h3>
@@ -560,7 +560,7 @@ export default function App() {
                 <div className="flex justify-between p-3 bg-slate-950 rounded-lg text-sm text-slate-300"><span>Terisolir:</span> <span className="font-mono text-rose-400">42</span></div>
                 <div className="flex justify-between p-3 bg-slate-950 rounded-lg text-sm text-slate-300"><span>Berhenti / Terminate:</span> <span className="font-mono text-slate-400">18</span></div>
               </div>
-              <button className="w-full mt-4 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm text-white font-medium">Export Laporan Pelanggan (Excel)</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="w-full mt-4 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm text-white font-medium">Export Laporan Pelanggan (Excel)</button>
             </div>
           </div>
         );
@@ -576,7 +576,7 @@ export default function App() {
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Telepon</label><input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="081234567890"/></div>
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Email Bantuan</label><input type="email" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="support@starbilling.net"/></div>
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Kunci Lisensi (License Key)</label><input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono" defaultValue="SB-LIFETIME-DEMO-2026"/></div>
-              <div className="pt-4"><button type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
+              <div className="pt-4"><button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
             </form>
           </div>
         );
@@ -586,7 +586,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Master Bank</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Rekening</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Rekening</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -610,7 +610,7 @@ export default function App() {
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Tripay Merchant Code</label><input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="T12345"/></div>
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Tripay API Key</label><input type="password" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="DEV-****************"/></div>
               <div><label className="block text-sm font-medium text-slate-400 mb-1">Tripay Private Key</label><input type="password" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="****************"/></div>
-              <div className="pt-4"><button type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
+              <div className="pt-4"><button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
             </form>
           </div>
         );
@@ -625,7 +625,7 @@ export default function App() {
               </div>
               <h3 className="font-bold text-white mb-2">QRIS Generator</h3>
               <p className="text-sm text-slate-400 mb-4">Generate QRIS dinamis untuk pembayaran tagihan otomatis tanpa PG.</p>
-              <button className="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-sm transition-colors text-white">Pengaturan</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-sm transition-colors text-white">Pengaturan</button>
             </div>
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
               <div className="flex justify-between items-start mb-4">
@@ -634,7 +634,7 @@ export default function App() {
               </div>
               <h3 className="font-bold text-white mb-2">Thermal Printer</h3>
               <p className="text-sm text-slate-400 mb-4">Cetak struk tagihan langsung ke printer thermal bluetooth/USB.</p>
-              <button className="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-sm transition-colors text-white">Pengaturan</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="w-full bg-slate-800 hover:bg-slate-700 py-2 rounded-lg text-sm transition-colors text-white">Pengaturan</button>
             </div>
           </div>
         );
@@ -644,7 +644,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Data Karyawan</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Karyawan</button>
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Karyawan</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -730,7 +730,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-white capitalize">{activeMenu.split('-').join(' ')}</h2>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                 + Tambah Data
               </button>
             </div>
@@ -855,7 +855,7 @@ export default function App() {
         </div>
 
         <div className="p-4 border-t border-slate-800">
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors">
+          <button onClick={() => alert('Fitur ini masih dalam tahap pengembangan!')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors">
             <LogOut size={20} />
             <span className={`\${!isSidebarOpen && 'lg:hidden'}`}>Logout</span>
           </button>
