@@ -78,7 +78,7 @@ function renderTable($headers, $rows) {
         foreach ($row as $col) {
             $html .= '<td class="px-6 py-4 text-slate-300">' . $col . '</td>';
         }
-        $html .= '<td class="px-6 py-4 text-right"><button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="text-blue-400 hover:text-blue-300">Edit</button></td></tr>';
+        $html .= '<td class="px-6 py-4 text-right"><button  class="text-blue-400 hover:text-blue-300">Edit</button></td></tr>';
     }
     $html .= '</tbody></table></div>';
     return $html;
@@ -95,7 +95,7 @@ function renderForm($fields, $title) {
         }
         $html .= '</div>';
     }
-    $html .= '</div><div class="mt-6"><button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-sm font-medium transition-colors">Simpan Pengaturan</button></div></div>';
+    $html .= '</div><div class="mt-6"><button  class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-sm font-medium transition-colors">Simpan Pengaturan</button></div></div>';
     return $html;
 }
 
@@ -240,7 +240,7 @@ function renderForm($fields, $title) {
                             <h3 class="font-bold text-white text-lg">Router Mikrotik</h3>
                             <p class="text-slate-400 text-sm mt-1">Daftar koneksi Router Mikrotik yang terhubung dengan sistem</p>
                         </div>
-                        <button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="shrink-0 bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                        <button  class="shrink-0 bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
                             <i class="fas fa-plus"></i> Tambah Router
                         </button>
                     </div>
@@ -272,8 +272,8 @@ function renderForm($fields, $title) {
                                     <td class="px-6 py-4 whitespace-nowrap">API</td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="p-2 text-blue-400 hover:bg-blue-400/10 rounded transition-colors" title="Edit"><i class="fas fa-edit"></i></button>
-                                            <button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="p-2 text-rose-400 hover:bg-rose-400/10 rounded transition-colors" title="Hapus"><i class="fas fa-trash"></i></button>
+                                            <button  class="p-2 text-blue-400 hover:bg-blue-400/10 rounded transition-colors" title="Edit"><i class="fas fa-edit"></i></button>
+                                            <button  class="p-2 text-rose-400 hover:bg-rose-400/10 rounded transition-colors" title="Hapus"><i class="fas fa-trash"></i></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -288,7 +288,7 @@ function renderForm($fields, $title) {
                             <h3 class="font-bold text-white text-lg">Devices List</h3>
                             <p class="text-slate-400 text-sm mt-1">Daftar perangkat GenieACS yang terhubung</p>
                         </div>
-                        <button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                        <button  class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
                             <i class="fas fa-cog"></i> Konfigurasi
                         </button>
                     </div>
@@ -347,9 +347,9 @@ function renderForm($fields, $title) {
                     <div class="p-6 border border-dashed border-slate-700 rounded-lg bg-slate-950 text-center mb-6">
                         <i class="fas fa-file-excel text-3xl text-slate-500 mb-4"></i>
                         <p class="text-sm text-slate-400 mb-4">Upload file Excel (.xlsx, .csv) untuk mengimpor data pelanggan secara massal.</p>
-                        <button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">Pilih File Data</button>
+                        <button  class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">Pilih File Data</button>
                     </div>
-                    <button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg transition-colors">Mulai Import Data</button>
+                    <button  class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg transition-colors">Mulai Import Data</button>
                 </div>
             <?php elseif ($active_menu === 'Update'): ?>
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 max-w-2xl mx-auto mt-10">
@@ -419,7 +419,7 @@ function renderForm($fields, $title) {
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-bold text-white capitalize"><?= htmlspecialchars($active_menu) ?></h2>
-                        <button onclick="alert(&quot;Fitur ini masih dalam tahap pengembangan!&quot;)" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <button  class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                             <i class="fas fa-plus mr-2"></i> Tambah Data
                         </button>
                     </div>
