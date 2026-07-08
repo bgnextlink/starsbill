@@ -1,4 +1,6 @@
-<?php
+const fs = require('fs');
+
+const phpCode = `<?php
 session_start();
 
 $menus = [
@@ -238,3 +240,7 @@ function renderForm($fields, $title) {
     </main>
 </body>
 </html>
+`;
+
+fs.writeFileSync('admin/index.php', phpCode);
+console.log('admin/index.php created successfully!');
