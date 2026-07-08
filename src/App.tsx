@@ -5,7 +5,7 @@ import {
   FileText, Building2, TerminalSquare, Puzzle, UsersRound, Settings2,
   LogOut, ChevronDown, ChevronRight, Menu, X, Download, Github, RefreshCw,
    
-} from 'lucide-react';
+Plus, Edit, Trash2, Search } from 'lucide-react';
 
 export default function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -209,61 +209,114 @@ export default function App() {
         
       case 'router-mikrotik':
         return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-3xl">
-            <h3 className="text-lg font-bold text-white mb-6">Konfigurasi API Router Mikrotik Utama</h3>
-            <div className="space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-slate-800 flex justify-between items-center">
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Nama Server</label>
-                <input type="text" defaultValue="Mikrotik Utama" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+                <h3 className="font-bold text-white text-lg">Router Mikrotik</h3>
+                <p className="text-slate-400 text-sm mt-1">Daftar koneksi Router Mikrotik yang terhubung dengan sistem</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">IP Address / Host</label>
-                <input type="text" defaultValue="192.168.1.1" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">API Port</label>
-                  <input type="number" defaultValue="8728" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">API Username</label>
-                  <input type="text" defaultValue="api_admin" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">API Password</label>
-                <input type="password" defaultValue="*********" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
-              </div>
-              <div className="pt-4">
-                <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                  Simpan Konfigurasi
-                </button>
-              </div>
+              <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                <Plus size={18} /> Tambah Router
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
+                  <tr>
+                    <th className="px-6 py-4">No</th>
+                    <th className="px-6 py-4">Koneksi</th>
+                    <th className="px-6 py-4">Auto Isolir</th>
+                    <th className="px-6 py-4">Aksi Isolir</th>
+                    <th className="px-6 py-4">Profile</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4">Mode Aktif</th>
+                    <th className="px-6 py-4 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50 text-slate-300">
+                  <tr className="hover:bg-slate-800/20">
+                    <td className="px-6 py-4">1</td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-white">Mikrotik Utama</div>
+                      <div className="text-xs text-slate-500">192.168.1.1:8728</div>
+                    </td>
+                    <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs">Aktif</span></td>
+                    <td className="px-6 py-4">Disable Secret</td>
+                    <td className="px-6 py-4">PPPoE</td>
+                    <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs">Connected</span></td>
+                    <td className="px-6 py-4">API</td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button className="p-2 text-blue-400 hover:bg-blue-400/10 rounded transition-colors" title="Edit"><Edit size={16} /></button>
+                        <button className="p-2 text-rose-400 hover:bg-rose-400/10 rounded transition-colors" title="Hapus"><Trash2 size={16} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         );
+
       case 'genieacs':
         return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-3xl">
-            <h3 className="text-lg font-bold text-white mb-6">Konfigurasi GenieACS</h3>
-            <div className="space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-slate-800 flex justify-between items-center">
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">URL GenieACS NBI</label>
-                <input type="text" placeholder="http://10.10.10.10:7557" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+                <h3 className="font-bold text-white text-lg">Devices List</h3>
+                <p className="text-slate-400 text-sm mt-1">Daftar perangkat GenieACS yang terhubung</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">GenieACS Username (Opsional)</label>
-                <input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+              <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                <Settings2 size={16} /> Konfigurasi
+              </button>
+            </div>
+            
+            <div className="p-6 border-b border-slate-800 bg-slate-950/30">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Cari Berdasarkan</label>
+                  <select className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <option value="all">SEMUA</option>
+                    <option value="mac">MAC Address</option>
+                    <option value="serial">Serial Number</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Pencarian</label>
+                  <div className="relative">
+                    <input type="text" placeholder="Masukkan Kata Kunci Pencarian" className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+                    <Search className="absolute left-3 top-2.5 text-slate-500" size={18} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Device Status</label>
+                  <select className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <option value="all">SEMUA</option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">GenieACS Password (Opsional)</label>
-                <input type="password" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500" />
-              </div>
-              <div className="pt-4">
-                <button className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                  Test Connection & Save
-                </button>
-              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
+                  <tr>
+                    <th className="px-6 py-4">No</th>
+                    <th className="px-6 py-4">Device Status</th>
+                    <th className="px-6 py-4">Product</th>
+                    <th className="px-6 py-4">Last Update</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50 text-slate-300">
+                  <tr className="hover:bg-slate-800/20">
+                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                      Tidak ada data perangkat ditemukan
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         );

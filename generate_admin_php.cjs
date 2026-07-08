@@ -115,8 +115,11 @@ function renderForm($fields, $title) {
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
+    <!-- Mobile Overlay -->
+    <div id="sidebar-overlay" onclick="document.getElementById('sidebar').classList.add('hidden'); document.getElementById('sidebar').classList.remove('flex'); this.classList.add('hidden')" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-full overflow-y-auto hidden md:flex">
+    <aside id="sidebar" class="w-64 bg-slate-900 border-r border-slate-800 flex-col h-full overflow-y-auto hidden md:flex absolute md:relative z-50">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white"><i class="fas fa-wifi"></i></div>
             <span class="font-bold text-lg">StarBilling</span>
@@ -124,11 +127,15 @@ function renderForm($fields, $title) {
         <nav class="flex-1 p-4 space-y-1">
             <?php foreach ($menus as $key => $item): ?>
                 <?php if (is_array($item)): ?>
-                    <div class="pt-4 pb-1">
-                        <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2"><?= htmlspecialchars($key) ?></p>
-                        <div class="space-y-1">
+                    <?php $is_active_group = in_array($active_menu, $item); ?>
+                    <div class="pt-2 pb-1">
+                        <button onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.fa-chevron-down').classList.toggle('rotate-180')" class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 hover:text-slate-300 transition-colors cursor-pointer">
+                            <span><?= htmlspecialchars($key) ?></span>
+                            <i class="fas fa-chevron-down transition-transform duration-200 <?= $is_active_group ? 'rotate-180' : '' ?>"></i>
+                        </button>
+                        <div class="space-y-1 <?= $is_active_group ? '' : 'hidden' ?>">
                             <?php foreach ($item as $subItem): ?>
-                                <a href="?menu=<?= urlencode($subItem) ?>" class="block px-3 py-2 rounded-lg text-sm transition-colors <?= $active_menu === $subItem ? 'bg-blue-600/10 text-blue-400' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' ?>">
+                                <a href="?menu=<?= urlencode($subItem) ?>" class="block px-3 py-2 pl-6 rounded-lg text-sm transition-colors <?= $active_menu === $subItem ? 'bg-blue-600/10 text-blue-400' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' ?>">
                                     <?= htmlspecialchars($subItem) ?>
                                 </a>
                             <?php endforeach; ?>
@@ -148,7 +155,7 @@ function renderForm($fields, $title) {
         <!-- Header -->
         <header class="bg-slate-900/50 border-b border-slate-800 p-4 flex justify-between items-center backdrop-blur-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
-                <button class="md:hidden text-slate-400 hover:text-white"><i class="fas fa-bars"></i></button>
+                <button onclick="document.getElementById('sidebar').classList.toggle('hidden'); document.getElementById('sidebar').classList.toggle('flex'); document.getElementById('sidebar-overlay').classList.toggle('hidden')" class="md:hidden text-slate-400 hover:text-white"><i class="fas fa-bars"></i></button>
                 <h1 class="text-xl font-bold capitalize"><?= htmlspecialchars($active_menu) ?></h1>
             </div>
             <div class="flex items-center gap-4">
@@ -229,19 +236,113 @@ function renderForm($fields, $title) {
                     </div>
                 </div>
             <?php elseif ($active_menu === 'Router Mikrotik' || $active_menu === 'Setting Server'): ?>
-                <?= renderForm([
-                    ['label' => 'Nama Server', 'type' => 'text', 'value' => 'Mikrotik Utama'],
-                    ['label' => 'IP Address / Host', 'type' => 'text', 'value' => '192.168.1.1'],
-                    ['label' => 'API Port', 'type' => 'number', 'value' => '8728'],
-                    ['label' => 'API Username', 'type' => 'text', 'value' => 'api_admin'],
-                    ['label' => 'API Password', 'type' => 'password', 'value' => '*********']
-                ], 'Koneksi RouterOS') ?>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h3 class="font-bold text-white text-lg">Router Mikrotik</h3>
+                            <p class="text-slate-400 text-sm mt-1">Daftar koneksi Router Mikrotik yang terhubung dengan sistem</p>
+                        </div>
+                        <button class="shrink-0 bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Tambah Router
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
+                                <tr>
+                                    <th class="px-6 py-4 whitespace-nowrap">No</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Koneksi</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Auto Isolir</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Aksi Isolir</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Profile</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Status</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Mode Aktif</th>
+                                    <th class="px-6 py-4 whitespace-nowrap text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/50 text-slate-300">
+                                <tr class="hover:bg-slate-800/20">
+                                    <td class="px-6 py-4">1</td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium text-white whitespace-nowrap">Mikrotik Utama</div>
+                                        <div class="text-xs text-slate-500 whitespace-nowrap">192.168.1.1:8728</div>
+                                    </td>
+                                    <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs whitespace-nowrap">Aktif</span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Disable Secret</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">PPPoE</td>
+                                    <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs whitespace-nowrap">Connected</span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">API</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button class="p-2 text-blue-400 hover:bg-blue-400/10 rounded transition-colors" title="Edit"><i class="fas fa-edit"></i></button>
+                                            <button class="p-2 text-rose-400 hover:bg-rose-400/10 rounded transition-colors" title="Hapus"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             <?php elseif ($active_menu === 'GenieACS'): ?>
-                <?= renderForm([
-                    ['label' => 'URL GenieACS NBI', 'type' => 'text', 'value' => 'http://10.10.10.10:7557'],
-                    ['label' => 'GenieACS Username (Opsional)', 'type' => 'text', 'value' => ''],
-                    ['label' => 'GenieACS Password (Opsional)', 'type' => 'password', 'value' => '']
-                ], 'Konfigurasi GenieACS') ?>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-white text-lg">Devices List</h3>
+                            <p class="text-slate-400 text-sm mt-1">Daftar perangkat GenieACS yang terhubung</p>
+                        </div>
+                        <button class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                            <i class="fas fa-cog"></i> Konfigurasi
+                        </button>
+                    </div>
+                    
+                    <div class="p-6 border-b border-slate-800 bg-slate-950/30">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Cari Berdasarkan</label>
+                                <select class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                                    <option value="all">SEMUA</option>
+                                    <option value="mac">MAC Address</option>
+                                    <option value="serial">Serial Number</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Pencarian</label>
+                                <div class="relative">
+                                    <input type="text" placeholder="Masukkan Kata Kunci Pencarian" class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-blue-500" />
+                                    <i class="fas fa-search absolute left-3 top-3 text-slate-500"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Device Status</label>
+                                <select class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                                    <option value="all">SEMUA</option>
+                                    <option value="online">Online</option>
+                                    <option value="offline">Offline</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
+                                <tr>
+                                    <th class="px-6 py-4">No</th>
+                                    <th class="px-6 py-4">Device Status</th>
+                                    <th class="px-6 py-4">Product</th>
+                                    <th class="px-6 py-4">Last Update</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/50 text-slate-300">
+                                <tr class="hover:bg-slate-800/20">
+                                    <td colspan="4" class="px-6 py-8 text-center text-slate-500">
+                                        Tidak ada data perangkat ditemukan
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             <?php elseif ($active_menu === 'Import Data'): ?>
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl">
                     <h3 class="font-bold mb-6 text-lg text-white">Import Data Pelanggan / Sistem</h3>
