@@ -6,6 +6,7 @@ import {
   LogOut, ChevronDown, ChevronRight, Menu, X, Download, Github, RefreshCw,
    
 Plus, Edit, Trash2, Search } from 'lucide-react';
+import Customers from './components/Customers';
 
 export default function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -345,26 +346,7 @@ export default function App() {
 
       case 'kelola-pelanggan':
       case 'data-pelanggan':
-        return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-white">Data Pelanggan</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Tambah Pelanggan</button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
-                  <tr><th className="px-6 py-4">ID</th><th className="px-6 py-4">Nama</th><th className="px-6 py-4">Paket</th><th className="px-6 py-4">IP Address</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Aksi</th></tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50 text-slate-300">
-                  <tr className="hover:bg-slate-800/20"><td className="px-6 py-4 font-mono text-xs">CST-001</td><td className="px-6 py-4 text-white">Budi Santoso</td><td className="px-6 py-4">Home 20 Mbps</td><td className="px-6 py-4 font-mono">10.10.1.5</td><td className="px-6 py-4"><span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs">Aktif</span></td><td className="px-6 py-4 text-right text-blue-400 cursor-pointer">Edit</td></tr>
-                  <tr className="hover:bg-slate-800/20"><td className="px-6 py-4 font-mono text-xs">CST-002</td><td className="px-6 py-4 text-white">Siti Aminah</td><td className="px-6 py-4">Home 50 Mbps</td><td className="px-6 py-4 font-mono">10.10.1.6</td><td className="px-6 py-4"><span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs">Aktif</span></td><td className="px-6 py-4 text-right text-blue-400 cursor-pointer">Edit</td></tr>
-                  <tr className="hover:bg-slate-800/20"><td className="px-6 py-4 font-mono text-xs">CST-003</td><td className="px-6 py-4 text-white">Andi Network</td><td className="px-6 py-4">Bisnis 100 Mbps</td><td className="px-6 py-4 font-mono">10.10.2.2</td><td className="px-6 py-4"><span className="px-2 py-1 bg-rose-500/20 text-rose-400 rounded-full text-xs">Isolir</span></td><td className="px-6 py-4 text-right text-blue-400 cursor-pointer">Edit</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <Customers />;
 
       case 'wilayah':
         return (
