@@ -45,7 +45,17 @@ if ($pos !== false) {
 
 $route_parts = explode('/', trim($route, '/'));
 $resource = $route_parts[0];
-$id = isset($route_parts[1]) ? intval($route_parts[1]) : null;
+
+// For nested resources like settings/wa-gateway
+if ($resource === 'settings' && isset($route_parts[1])) {
+    $resource = $route_parts[0] . '/' . $route_parts[1];
+    $id = isset($route_parts[2]) ? intval($route_parts[2]) : null;
+} else if ($resource === 'acs' && isset($route_parts[1])) {
+    $resource = $route_parts[0] . '/' . $route_parts[1];
+    $id = isset($route_parts[2]) ? intval($route_parts[2]) : null;
+} else {
+    $id = isset($route_parts[1]) ? intval($route_parts[1]) : null;
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 $input = json_decode(file_get_contents('php://input'), true);
@@ -61,94 +71,19 @@ function respondError($msg, $code = 400) {
     exit();
 }
 
-if ($resource === 'customers') {
+function handleCrud($conn, $table, $method, $id, $input) {
     if ($method === 'GET') {
-        $result = $conn->query("SELECT * FROM customers ORDER BY id DESC");
+        $result = $conn->query("SELECT * FROM $table ORDER BY id DESC");
         $data = [];
-        while($row = $result->fetch_assoc()) {
-            $data[] = $row;
+        if ($result) {
+            while($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
         }
         respond(["data" => $data]);
     } 
     elseif ($method === 'POST') {
         if (!$input) respondError("Data kosong");
-        
-        // Simple mapping, sanitize properly in production
-        $fields = [];
-        $values = [];
-        $types = "";
-        $params = [];
-        
-        foreach ($input as $key => $val) {
-            if ($key !== 'id') { // don't insert id
-                $fields[] = "`$key`";
-                $values[] = "?";
-                $types .= is_int($val) ? "i" : "s";
-                $params[] = $val;
-            }
-        }
-        
-        $sql = "INSERT INTO customers (" . implode(", ", $fields) . ") VALUES (" . implode(", ", $values) . ")";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param($types, ...$params);
-        
-        if ($stmt->execute()) {
-            $input['id'] = $conn->insert_id;
-            respond(["data" => $input]);
-        } else {
-            respondError($stmt->error, 500);
-        }
-    }
-    elseif ($method === 'PUT' && $id) {
-        if (!$input) respondError("Data kosong");
-        
-        $sets = [];
-        $types = "";
-        $params = [];
-        
-        foreach ($input as $key => $val) {
-            if ($key !== 'id') {
-                $sets[] = "`$key` = ?";
-                $types .= is_int($val) ? "i" : "s";
-                $params[] = $val;
-            }
-        }
-        
-        $types .= "i";
-        $params[] = $id;
-        
-        $sql = "UPDATE customers SET " . implode(", ", $sets) . " WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param($types, ...$params);
-        
-        if ($stmt->execute()) {
-            $input['id'] = $id;
-            respond(["data" => $input]);
-        } else {
-            respondError($stmt->error, 500);
-        }
-    }
-    elseif ($method === 'DELETE' && $id) {
-        $stmt = $conn->prepare("DELETE FROM customers WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        if ($stmt->execute()) {
-            respond(["success" => true]);
-        } else {
-            respondError($stmt->error, 500);
-        }
-    }
-}
-elseif ($resource === 'routers') {
-    if ($method === 'GET') {
-        $result = $conn->query("SELECT * FROM routers ORDER BY id DESC");
-        $data = [];
-        while($row = $result->fetch_assoc()) {
-            $data[] = $row;
-        }
-        respond(["data" => $data]);
-    } 
-    elseif ($method === 'POST') {
-        // Similar to customers POST
         $fields = []; $values = []; $types = ""; $params = [];
         foreach ($input as $key => $val) {
             if ($key !== 'id') {
@@ -156,15 +91,20 @@ elseif ($resource === 'routers') {
                 $types .= is_int($val) ? "i" : "s"; $params[] = $val;
             }
         }
-        $sql = "INSERT INTO routers (" . implode(", ", $fields) . ") VALUES (" . implode(", ", $values) . ")";
+        $sql = "INSERT INTO $table (" . implode(", ", $fields) . ") VALUES (" . implode(", ", $values) . ")";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param($types, ...$params);
-        if ($stmt->execute()) {
-            $input['id'] = $conn->insert_id;
-            respond(["data" => $input]);
-        } else respondError($stmt->error, 500);
+        if ($stmt) {
+            $stmt->bind_param($types, ...$params);
+            if ($stmt->execute()) {
+                $input['id'] = $conn->insert_id;
+                respond(["data" => $input]);
+            } else respondError($stmt->error, 500);
+        } else {
+            respondError($conn->error, 500);
+        }
     }
     elseif ($method === 'PUT' && $id) {
+        if (!$input) respondError("Data kosong");
         $sets = []; $types = ""; $params = [];
         foreach ($input as $key => $val) {
             if ($key !== 'id') {
@@ -173,35 +113,88 @@ elseif ($resource === 'routers') {
             }
         }
         $types .= "i"; $params[] = $id;
-        $sql = "UPDATE routers SET " . implode(", ", $sets) . " WHERE id = ?";
+        $sql = "UPDATE $table SET " . implode(", ", $sets) . " WHERE id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param($types, ...$params);
-        if ($stmt->execute()) {
-            $input['id'] = $id;
-            respond(["data" => $input]);
-        } else respondError($stmt->error, 500);
+        if ($stmt) {
+            $stmt->bind_param($types, ...$params);
+            if ($stmt->execute()) {
+                $input['id'] = $id;
+                respond(["data" => $input]);
+            } else respondError($stmt->error, 500);
+        } else {
+            respondError($conn->error, 500);
+        }
     }
     elseif ($method === 'DELETE' && $id) {
-        $stmt = $conn->prepare("DELETE FROM routers WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        if ($stmt->execute()) respond(["success" => true]);
-        else respondError($stmt->error, 500);
+        $stmt = $conn->prepare("DELETE FROM $table WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $id);
+            if ($stmt->execute()) respond(["success" => true]);
+            else respondError($stmt->error, 500);
+        } else {
+            respondError($conn->error, 500);
+        }
     }
+}
+
+if ($resource === 'customers') {
+    handleCrud($conn, 'customers', $method, $id, $input);
+}
+elseif ($resource === 'routers') {
+    handleCrud($conn, 'routers', $method, $id, $input);
 }
 elseif ($resource === 'invoices') {
-    if ($method === 'GET') {
-        $result = $conn->query("SELECT * FROM invoices ORDER BY id DESC");
-        $data = [];
-        while($row = $result->fetch_assoc()) $data[] = $row;
-        respond(["data" => $data]);
-    }
+    handleCrud($conn, 'invoices', $method, $id, $input);
 }
 elseif ($resource === 'tickets') {
+    handleCrud($conn, 'tickets', $method, $id, $input);
+}
+elseif ($resource === 'settings/wa-gateway') {
     if ($method === 'GET') {
-        $result = $conn->query("SELECT * FROM tickets ORDER BY id DESC");
+        $result = $conn->query("SELECT * FROM wa_settings ORDER BY id ASC LIMIT 1");
         $data = [];
-        while($row = $result->fetch_assoc()) $data[] = $row;
+        if ($result && $result->num_rows > 0) {
+            $data[] = $result->fetch_assoc();
+        } else {
+            // default if empty
+            $data[] = ["id" => 1, "api_endpoint" => "http://localhost:8000/send-message"];
+        }
         respond(["data" => $data]);
+    } elseif ($method === 'PUT') {
+        $id = 1;
+        // check if exists
+        $result = $conn->query("SELECT id FROM wa_settings WHERE id = 1");
+        if ($result && $result->num_rows === 0) {
+            $conn->query("INSERT INTO wa_settings (id, api_endpoint) VALUES (1, 'http://localhost:8000/send-message')");
+        }
+        
+        $sets = []; $types = ""; $params = [];
+        foreach ($input as $key => $val) {
+            if ($key !== 'id') {
+                $sets[] = "`$key` = ?";
+                $types .= is_int($val) ? "i" : "s"; $params[] = $val;
+            }
+        }
+        $types .= "i"; $params[] = $id;
+        $sql = "UPDATE wa_settings SET " . implode(", ", $sets) . " WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param($types, ...$params);
+            if ($stmt->execute()) {
+                $input['id'] = $id;
+                respond(["data" => $input]);
+            } else respondError($stmt->error, 500);
+        } else {
+            respondError($conn->error, 500);
+        }
+    }
+}
+elseif ($resource === 'acs/servers') {
+    handleCrud($conn, 'acs_servers', $method, $id, $input);
+}
+elseif ($resource === 'acs/devices') {
+    if ($method === 'GET') {
+        respond(["data" => []]); // mock for ACS devices since it usually hits external API
     }
 }
 
