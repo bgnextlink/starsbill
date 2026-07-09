@@ -3,10 +3,14 @@ import {
   LayoutDashboard, Server, Users, MapPin, Router, Package, UserCheck, UserPlus,
   WalletCards, Ticket, MessageSquare, ArrowRightLeft, CreditCard, Receipt, HandCoins,
   FileText, Building2, TerminalSquare, Puzzle, UsersRound, Settings2,
-  LogOut, ChevronDown, ChevronRight, Menu, X, Download, Github, RefreshCw,
-   
-Plus, Edit, Trash2, Search } from 'lucide-react';
+  LogOut, ChevronDown, ChevronRight, Menu, X, Download, Github, RefreshCw
+} from 'lucide-react';
+import RouterMikrotik from './components/RouterMikrotik';
+import GenieACS from './components/GenieACS';
 import Customers from './components/Customers';
+import Tickets from './components/Tickets';
+import Billing from './components/Billing';
+import WhatsAppGateway from './components/WhatsAppGateway';
 
 export default function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -209,118 +213,10 @@ export default function App() {
 
         
       case 'router-mikrotik':
-        return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-white text-lg">Router Mikrotik</h3>
-                <p className="text-slate-400 text-sm mt-1">Daftar koneksi Router Mikrotik yang terhubung dengan sistem</p>
-              </div>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
-                <Plus size={18} /> Tambah Router
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
-                  <tr>
-                    <th className="px-6 py-4">No</th>
-                    <th className="px-6 py-4">Koneksi</th>
-                    <th className="px-6 py-4">Auto Isolir</th>
-                    <th className="px-6 py-4">Aksi Isolir</th>
-                    <th className="px-6 py-4">Profile</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Mode Aktif</th>
-                    <th className="px-6 py-4 text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50 text-slate-300">
-                  <tr className="hover:bg-slate-800/20">
-                    <td className="px-6 py-4">1</td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-white">Mikrotik Utama</div>
-                      <div className="text-xs text-slate-500">192.168.1.1:8728</div>
-                    </td>
-                    <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs">Aktif</span></td>
-                    <td className="px-6 py-4">Disable Secret</td>
-                    <td className="px-6 py-4">PPPoE</td>
-                    <td className="px-6 py-4"><span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs">Connected</span></td>
-                    <td className="px-6 py-4">API</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-blue-400 hover:bg-blue-400/10 rounded transition-colors" title="Edit"><Edit size={16} /></button>
-                        <button className="p-2 text-rose-400 hover:bg-rose-400/10 rounded transition-colors" title="Hapus"><Trash2 size={16} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <RouterMikrotik />;
 
       case 'genieacs':
-        return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-white text-lg">Devices List</h3>
-                <p className="text-slate-400 text-sm mt-1">Daftar perangkat GenieACS yang terhubung</p>
-              </div>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm">
-                <Settings2 size={16} /> Konfigurasi
-              </button>
-            </div>
-            
-            <div className="p-6 border-b border-slate-800 bg-slate-950/30">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Cari Berdasarkan</label>
-                  <select className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-                    <option value="all">SEMUA</option>
-                    <option value="mac">MAC Address</option>
-                    <option value="serial">Serial Number</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Pencarian</label>
-                  <div className="relative">
-                    <input type="text" placeholder="Masukkan Kata Kunci Pencarian" className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-blue-500" />
-                    <Search className="absolute left-3 top-2.5 text-slate-500" size={18} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Device Status</label>
-                  <select className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-                    <option value="all">SEMUA</option>
-                    <option value="online">Online</option>
-                    <option value="offline">Offline</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
-                  <tr>
-                    <th className="px-6 py-4">No</th>
-                    <th className="px-6 py-4">Device Status</th>
-                    <th className="px-6 py-4">Product</th>
-                    <th className="px-6 py-4">Last Update</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50 text-slate-300">
-                  <tr className="hover:bg-slate-800/20">
-                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
-                      Tidak ada data perangkat ditemukan
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <GenieACS />;
       case 'import-data':
         return (
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-3xl">
@@ -454,61 +350,15 @@ export default function App() {
         );
 
       case 'komplain':
-        return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-white">Ticket Komplain</h3>
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">+ Buat Tiket</button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
-                  <tr><th className="px-6 py-4">ID Tiket</th><th className="px-6 py-4">Pelanggan</th><th className="px-6 py-4">Keluhan</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Aksi</th></tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50 text-slate-300">
-                  <tr className="hover:bg-slate-800/20"><td className="px-6 py-4 font-mono">TK-9921</td><td className="px-6 py-4 text-white">Budi Santoso</td><td className="px-6 py-4">Internet Putus-putus</td><td className="px-6 py-4"><span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">Open</span></td><td className="px-6 py-4 text-right text-blue-400 cursor-pointer">Tindak Lanjuti</td></tr>
-                  <tr className="hover:bg-slate-800/20"><td className="px-6 py-4 font-mono">TK-9922</td><td className="px-6 py-4 text-white">Siti Aminah</td><td className="px-6 py-4">Modem Merah (LOS)</td><td className="px-6 py-4"><span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">In Progress</span></td><td className="px-6 py-4 text-right text-blue-400 cursor-pointer">Tindak Lanjuti</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <Tickets />;
 
       case 'pesan':
-        return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-3xl">
-            <h3 className="text-lg font-bold text-white mb-6">Setting WhatsApp Gateway & Pesan Otomatis</h3>
-            <form className="space-y-4">
-              <div><label className="block text-sm font-medium text-slate-400 mb-1">WhatsApp API Endpoint</label><input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="http://localhost:8000/send-message"/></div>
-              <div><label className="block text-sm font-medium text-slate-400 mb-1">Template Tagihan Baru</label><textarea rows={4} className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="Yth. *{nama}*, tagihan internet Anda sebesar *{jumlah}* sudah terbit. Harap bayar sebelum tanggal *{jatuh_tempo}*."/></div>
-              <div><label className="block text-sm font-medium text-slate-400 mb-1">Template Peringatan Isolir</label><textarea rows={4} className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white" defaultValue="Yth. *{nama}*, internet Anda telah di-isolir karena melewati batas pembayaran."/></div>
-              <div className="pt-4"><button type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Simpan Perubahan</button></div>
-            </form>
-          </div>
-        );
+        return <WhatsAppGateway />;
 
       case 'transaksi':
       case 'transaksi-lain':
       case 'pembayaran':
-        return (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-white">Pembayaran & Transaksi</h3>
-              <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Proses Pembayaran</button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-950/50 border-b border-slate-800">
-                  <tr><th className="px-6 py-4">Invoice</th><th className="px-6 py-4">Pelanggan</th><th className="px-6 py-4">Bulan</th><th className="px-6 py-4">Total</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Aksi</th></tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50 text-slate-300">
-                  <tr className="hover:bg-slate-800/20"><td className="px-6 py-4 font-mono text-xs">INV-202607-001</td><td className="px-6 py-4 text-white">Budi Santoso</td><td className="px-6 py-4">Juli 2026</td><td className="px-6 py-4">Rp 150.000</td><td className="px-6 py-4"><span className="text-emerald-400">Lunas</span></td><td className="px-6 py-4 text-right text-blue-400 cursor-pointer">Cetak Struk</td></tr>
-                  <tr className="hover:bg-slate-800/20"><td className="px-6 py-4 font-mono text-xs">INV-202607-002</td><td className="px-6 py-4 text-white">Andi Network</td><td className="px-6 py-4">Juli 2026</td><td className="px-6 py-4">Rp 500.000</td><td className="px-6 py-4"><span className="text-rose-400">Belum Bayar</span></td><td className="px-6 py-4 text-right text-blue-400 cursor-pointer">Bayar</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <Billing />;
 
       case 'biaya-diskon':
         return (
